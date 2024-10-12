@@ -1,0 +1,10 @@
+# vars/default-example.yml
+# modify for each deployment
+---
+user_name: my_user_name
+sys_packages: ['nginx', 'curl', 'wget', 'git']
+project_repo: https://github.com/user/repo.git
+app_dir: "/home/{{ user_name }}/{{ app_name }}"
+server_IP: XXX.XXX.XXX.XX
+domain_name: mydomain.org
+email: my.email@domain.com
