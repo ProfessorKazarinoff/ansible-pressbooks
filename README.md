@@ -31,6 +31,12 @@ try and ping the server using the root user ```ansible hosts -m ping -u root```
 try to run an ansible ad hoc command ```ansible hosts -a "free -h" -u root``` and ```ansible hosts -a "date" -u root```
 This uses the default ```-m command``` module and sets ```-a "argument"``` sent to that module. so ```ansible hosts -m command -a "date" -u root``` is the same as the previous command.
 
+copy vars/default-example.yml as vars/default.yml. Edit vars/default.yml with the username and apt packages you want to install
+
 try and run the initial server setup playbook
 
 ```ansible-playbook initial-server-setup.yml -u root```
+
+After that you can try running it as your new user
+
+```ansible-playbook initial-server-setup.yml -u <user_name from vars/default.yml>```
