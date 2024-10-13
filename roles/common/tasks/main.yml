@@ -1,0 +1,75 @@
+##########################################################
+# Based on DO Community Playbooks: Initial Server Setup  #
+##########################################################
+# https://www.digitalocean.com/community/tutorials/how-to-use-ansible-to-automate-initial-server-setup-on-ubuntu-18-04
+# modified for this GitHub repo
+---
+# Print out a message to the user about the playbook that's running
+- name: Print message
+  ansible.builtin.debug:
+    msg: Running initial-server-setup.yml playbook
+# Install apt
+- name: Install aptitude
+  apt:
+    name: aptitude
+    state: latest
+    update_cache: true
+# Run apt update && apt upgrade
+- name: sudo apt update && sudo apt upgrade 
+  apt:
+    upgrade: yes
+    update_cache: yes
+    cache_valid_time: 86400 #one day
+# Set up passwordless sudo
+- name: Setup passwordless sudo
+  lineinfile:
+    path: /etc/sudoers
+    state: present
+    regexp: '^%sudo'
+    line: '%sudo ALL=(ALL) NOPASSWD: ALL'
+    validate: '/usr/sbin/visudo -cf %s' 
+# Create a new user with the username in vars/default.yml and give them sudo
+- name: Create a new regular user with sudo privileges
+  user:
+    name: "{{ user_name }}"
+    state: present
+    groups: sudo
+    append: true
+    create_home: true
+- name: Synchronize two directories on one remote host.
+  ansible.posix.synchronize:
+    src: /root/.ssh
+    dest: /home/{{ user_name }}
+  delegate_to: "{{ inventory_hostname }}"
+- name: Change directory ownership, group and permissions
+  ansible.builtin.file:
+    path: /home/{{ user_name }}/.ssh
+    state: directory
+    recurse: yes
+    owner: "{{ user_name }}"
+    group: "{{ user_name }}"
+- name: Disable password authentication for root
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    state: present
+    regexp: '^#?PermitRootLogin'
+    line: 'PermitRootLogin prohibit-password'
+# Install apt packages  
+- name: Install required system packages
+  apt:
+    pkg: "{{ sys_packages }}"
+    state: latest
+    update_cache: true
+# UFW Setup
+- name: UFW - Allow SSH connections
+  community.general.ufw:
+    rule: allow
+    name: OpenSSH
+- name: UFW - Enable and deny by default
+  community.general.ufw:
+    state: enabled
+    default: deny
+# Print out a message to the user that the playbook is complete
+- name: Playbook Complete
+  ansible.builtin.debug:
+    msg: initial-server-setup.yml playbook run complete! Your server is set up
