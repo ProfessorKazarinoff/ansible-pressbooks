@@ -1,0 +1,33 @@
+# ansible role that installs the Apache2 web server
+---
+# Print out a message to the user about the playbook that's running
+- name: Print message
+  ansible.builtin.debug:
+    msg: Running apache role main.yml playbook
+# Install apt
+- name: Install aptitude
+  apt:
+    name: aptitude
+    state: latest
+    update_cache: true
+# Run apt update && apt upgrade
+- name: sudo apt update && sudo apt upgrade 
+  apt:
+    upgrade: yes
+    update_cache: yes
+    cache_valid_time: 86400 #one day
+# Install apache2 with apt  
+- name: Install apache2 with apt
+  apt:
+    pkg: apache2
+    state: latest
+    update_cache: true
+# UFW update
+- name: UFW - Allow Apache to use port 80
+  community.general.ufw:
+    rule: allow
+    name: Apache
+# Print out a message to the user that the playbook is complete
+- name: Playbook Complete
+  ansible.builtin.debug:
+    msg: apache setup complete! Try to log into your server on port 80

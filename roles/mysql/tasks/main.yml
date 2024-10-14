@@ -1,0 +1,31 @@
+# ansible role that installs MySQL server
+---
+# Print out a message to the user about the playbook that's running
+- name: Print message
+  ansible.builtin.debug:
+    msg: Running mysql role main.yml playbook
+# Install apt
+- name: Install aptitude
+  apt:
+    name: aptitude
+    state: latest
+    update_cache: true
+# Run apt update && apt upgrade
+- name: sudo apt update && sudo apt upgrade 
+  apt:
+    upgrade: yes
+    update_cache: yes
+    cache_valid_time: 86400 #one day
+# Install mysql-server and mysql-client with apt  
+- name: Install mysql-server with apt
+  apt:
+    pkg:
+      - mysql-server
+      #- mysql-client
+    state: latest
+    update_cache: true
+
+# Print out a message to the user that the playbook is complete
+- name: Playbook Complete
+  ansible.builtin.debug:
+    msg: MySQL setup complete!
