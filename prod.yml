@@ -4,6 +4,6 @@
   vars_files:
     - vars/default.yml
   roles:
-    #- common
+    - common
     - apache
-    - mysql
+    #- mysql

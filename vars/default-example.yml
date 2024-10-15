@@ -2,9 +2,9 @@
 # modify for each deployment
 ---
 user_name: my_user_name
-sys_packages: ['nginx', 'curl', 'wget', 'git']
-project_repo: https://github.com/user/repo.git
-app_dir: "/home/{{ user_name }}/{{ app_name }}"
-server_IP: XXX.XXX.XXX.XX
+sys_packages: ['nginx', 'curl', 'wget', 'git', 'ufw']
+mysql_user: my_mysql_user
+mysql_password: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+server_ip: XXX.XX.XX.XXX
 domain_name: mydomain.org
-email: my.email@domain.com
+email: user.name@domain.com

@@ -17,7 +17,7 @@
     update_cache: yes
     cache_valid_time: 86400 #one day
 # Install apache2 with apt  
-- name: Install apache2 with apt
+- name: Install Apache2 with apt
   apt:
     pkg: apache2
     state: latest
@@ -27,6 +27,11 @@
   community.general.ufw:
     rule: allow
     name: Apache
+# Check the Apache2 webpage loads successfully
+- name: Check that the Apache2 page loads successfully
+  ansible.builtin.uri:
+    url: "http://{{server_ip}}"
+    return_content: true
 # Print out a message to the user that the playbook is complete
 - name: Playbook Complete
   ansible.builtin.debug:
