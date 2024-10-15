@@ -19,7 +19,9 @@
 # Install apache2 with apt  
 - name: Install Apache2 with apt
   apt:
-    pkg: apache2
+    pkg:
+      - apache2
+      - apache2-client
     state: latest
     update_cache: true
 # UFW update

@@ -5,19 +5,19 @@
     state: present
     force: yes
     update_cache: yes
-- name: Create a symbolic link
-  ansible.builtin.file:
-    src: /etc/nginx/sites-available/default
-    dest: /etc/nginx/sites-enabled/default
-    owner: "{{ user_name }}"
-    group: "{{ user_name }}"
-    state: link
-  notify: reload nginx
+# - name: Create a symbolic link
+#   ansible.builtin.file:
+#     src: /etc/nginx/sites-available/default
+#     dest: /etc/nginx/sites-enabled/default
+#     owner: "{{ user_name }}"
+#     group: "{{ user_name }}"
+#     state: link
+#   notify: reload nginx
 
-- name: Set nginx user
-  lineinfile:
-    dest: /etc/nginx/nginx.conf
-    regexp: "^user"
-    line: "user {{ user_name }}"
-    state: present
-  notify: restart nginx
+# - name: Set nginx user
+#   lineinfile:
+#     dest: /etc/nginx/nginx.conf
+#     regexp: "^user"
+#     line: "user {{ user_name }}"
+#     state: present
+#   notify: restart nginx
