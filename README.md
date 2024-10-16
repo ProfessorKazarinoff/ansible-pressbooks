@@ -40,3 +40,5 @@ try and run the initial server setup playbook
 After that you can try running it as your new user
 
 ```ansible-playbook initial-server-setup.yml -u <user_name from vars/default.yml>```
+
+For wp role, see: https://github.com/sanjeebnepal/ansible-wordpress/blob/main/wordpress.yml
