@@ -2,7 +2,7 @@
 # modify for each deployment
 ---
 user_name: my_user_name
-sys_packages: ['nginx', 'curl', 'wget', 'git', 'ufw']
+sys_packages: ['curl', 'wget', 'git', 'ufw']
 mysql_user: my_mysql_user
 mysql_password: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 server_ip: XXX.XX.XX.XXX
