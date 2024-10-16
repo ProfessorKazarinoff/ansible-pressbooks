@@ -8,3 +8,5 @@ mysql_password: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 server_ip: XXX.XX.XX.XXX
 domain_name: mydomain.org
 email: user.name@domain.com
+php_version: "8.0"
+wordpress_version: "6.6"

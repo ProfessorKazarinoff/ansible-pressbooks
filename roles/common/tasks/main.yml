@@ -8,12 +8,6 @@
 - name: Print message
   ansible.builtin.debug:
     msg: Running initial-server-setup.yml playbook
-# Install apt
-- name: Install aptitude
-  apt:
-    name: aptitude
-    state: latest
-    update_cache: true
 # Run apt update && apt upgrade
 - name: sudo apt update && sudo apt upgrade 
   apt:

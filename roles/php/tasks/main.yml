@@ -4,41 +4,36 @@
 - name: Print message
   ansible.builtin.debug:
     msg: Running php role main.yml playbook
-# Install apt
-#- name: Install aptitude
-#  apt:
-#    name: aptitude
-#    state: latest
-#    update_cache: true
+- name: Install python3-apt package
+  apt:
+    pkg: python3-apt
+    state: present
+    update_cache: true
 - name: Add ppa:ondrej/php repository into apt repository sources list
   ansible.builtin.apt_repository:
     validate_certs: no
     repo: 'ppa:ondrej/php'
-    state: absent
+    state: present
+    update_cache: yes
 # Run apt update && apt upgrade
 - name: sudo apt update && sudo apt upgrade 
   apt:
     upgrade: yes
     update_cache: yes
-    cache_valid_time: 86400 #one day
 # Install mysql-server and mysql-client with apt  
 - name: Install php with apt
   apt:
     pkg:
-      - php8.0
-      - libapache2-mod-php8.0
-      - php8.0-mysql
-      - php8.0-cli
-      - php8.0-common
-      - php8.0-opcache
-      - php8.0-readline
-      - php8.0-mbstring
-      - php8.0-xml
-      - php8.0-gd
-      - php8.0-curl
+      - "php{{ php_version }}"
+      - "libapache2-mod-php{{ php_version }}"
+      - "php{{ php_version }}-mysql"
+      - "php{{ php_version }}-cli"
+      - "php{{ php_version }}-common"
+      - "php{{ php_version }}-opcache"
+      - "php{{ php_version }}-readline"
+      - "php{{ php_version }}-mbstring"
+      - "php{{ php_version }}-xml"
+      - "php{{ php_version }}-gd"
+      - "php{{ php_version }}-curl"
     state: latest
     update_cache: true
-# - name: Start mysql service
-#   service:
-#     name: mysql.service
-#     state: started
