@@ -21,9 +21,13 @@
   apt:
     pkg:
       - apache2
-      - apache2-client
+      - apache2-utils
     state: latest
     update_cache: true
+- name: Start apache2 service
+  service:
+    name: apache2
+    state: started
 # UFW update
 - name: UFW - Allow Apache to use port 80
   community.general.ufw:

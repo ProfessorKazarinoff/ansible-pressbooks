@@ -7,7 +7,7 @@
     - common
     #- nginx
     - apache
-    #- mysql
+    - mysql
     - php
     #- wordpress
     #- pressbooks
