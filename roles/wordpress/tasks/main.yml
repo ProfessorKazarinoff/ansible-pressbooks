@@ -1,0 +1,60 @@
+---
+# Create a new wordpress user with the username in vars/default.yml and give them sudo
+- name: Create a new wordpress user with sudo privileges
+  user:
+    name: "{{ wordpress_user }}"
+    state: present
+    groups: sudo
+    append: true
+    create_home: true
+- name: Synchronize .ssh directory for the wordpress user
+  ansible.posix.synchronize:
+    src: /root/.ssh
+    dest: /home/{{ wordpress_user }}
+  delegate_to: "{{ inventory_hostname }}"
+- name: Change directory ownership, group and permissions
+  ansible.builtin.file:
+    path: /home/{{ wordpress_user }}/.ssh
+    state: directory
+    recurse: yes
+    owner: "{{ wordpress_user }}"
+    group: "{{ wordpress_user }}"
+
+# download wordpress
+# https://wordpress.org/wordpress-6.1.1.tar.gz
+- name: Download and unzip wordpress from wordpress.org
+  ansible.builtin.unarchive:
+    src: "https://wordpress.org/wordpress-{{ wordpress_version }}.tar.gz"
+    dest: /tmp
+    remote_src: yes
+- name: Synchronize wordpress/ directory into /var/www/html/
+  ansible.posix.synchronize:
+    src: /tmp/wordpress/
+    dest: /var/www/html
+  delegate_to: "{{ inventory_hostname }}"
+- name: Copy wp-config-sample.php file
+  ansible.builtin.copy:
+    src: /var/www/html/wp-config-sample.php
+    dest: /var/www/html/wp-config.php
+    remote_src: true
+
+# To Do:
+# 1. edit the following lines with the appropriate values in wp-config.php
+
+# define('DB_NAME', 'wordpress');
+
+# define('DB_USER', 'wordpressuser');
+
+# define('DB_PASSWORD', 'password');
+
+# 2. chown -R wordpress:www-data *
+# 3. mkdir /var/www/html/wp-content/uploads
+# 4. chown -R :www-data /var/www/html/wp-content/
+
+# 5. edit the file ‘/etc/apache2/mods-available/dir.conf’
+#  and change the following line to look like this.
+
+# DirectoryIndex index.php index.html index.cgi index.pl index.xhtml index.htm
+
+# 6. restart Apache service
+# service apache2 restart

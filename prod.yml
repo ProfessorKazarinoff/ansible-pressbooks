@@ -9,5 +9,5 @@
     - apache
     - mysql
     - php
-    #- wordpress
+    - wordpress
     #- pressbooks

@@ -9,4 +9,5 @@ server_ip: XXX.XX.XX.XXX
 domain_name: mydomain.org
 email: user.name@domain.com
 php_version: "8.0"
-wordpress_version: "6.6"
+wordpress_version: "6.1.1"
+wordpress_user: wordpress
