@@ -63,10 +63,10 @@
     login_unix_socket: /run/mysqld/mysqld.sock
 - name: Create a new database with name 'wpdb'
   community.mysql.mysql_db:
-    name: wpdb
+    name: "{{ mysql_database_name }}"
     state: present
     login_unix_socket: /run/mysqld/mysqld.sock
-- name: Create database user with name 'bob' and password '12345' with all database privileges
+- name: Create database user with name 'mysql_user' and password 'mysql_password' from vars/default.yml with all database privileges
   community.mysql.mysql_user:
     name: "{{ mysql_user }}"
     password: "{{ mysql_password }}"
@@ -74,7 +74,7 @@
     state: present
     login_unix_socket: /run/mysqld/mysqld.sock
 
-# # Print out a message to the user that the playbook is complete
-# - name: Playbook Complete
-#   ansible.builtin.debug:
-#     msg: MySQL setup complete!
+# Print out a message to the user that the playbook is complete
+- name: Playbook Complete
+  ansible.builtin.debug:
+    msg: MySQL setup complete!

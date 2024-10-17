@@ -10,4 +10,6 @@
     - mysql
     - php
     - wordpress
+    #- wordpress_multisite
+    #- ssl
     #- pressbooks
