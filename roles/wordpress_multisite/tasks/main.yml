@@ -11,7 +11,7 @@
 # /* Multisite */
 # define( 'WP_ALLOW_MULTISITE', true );
 # into  wp-config.php
-- name: Add definedefine('DB_PASSWORD', 'password'); to wp-config.php
+- name: Add define( 'WP_ALLOW_MULTISITE', true ); to wp-config.php
   ansible.builtin.lineinfile:
     path: /var/www/html/wp-config.php
     insertafter: "^/\\* That's all, stop editing! Happy publishing. \\*/"
@@ -21,5 +21,4 @@
     msg:
       - "install a network in wordpress with admin -> tools -> network setup"
       - "Enable network in wordpress with the instructions on the Create a Network of WordPress Sites screen"
-
-# 
+      - "Make sure pretty slug links works"

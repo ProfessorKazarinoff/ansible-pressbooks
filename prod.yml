@@ -13,4 +13,4 @@
     #- wordpress_multisite
     #- wordpress_multisite2
     #- ssl
-    #- pressbooks
+    - pressbooks
