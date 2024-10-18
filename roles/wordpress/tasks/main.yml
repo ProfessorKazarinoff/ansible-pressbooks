@@ -100,5 +100,9 @@
   service:
     name: apache2
     state: restarted
-
-# 7. ping the server and make sure that workpress is running
+# Print out a message to the user about the playbook that's running
+- name: Print message
+  ansible.builtin.debug:
+    msg:
+      - Log in and create a user in wordpress
+      - Make sure pretty permalinks are working and no plugins are installed

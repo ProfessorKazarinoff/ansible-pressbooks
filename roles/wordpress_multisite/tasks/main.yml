@@ -20,5 +20,5 @@
   ansible.builtin.debug:
     msg:
       - "install a network in wordpress with admin -> tools -> network setup"
+      - "on network setup screen click blue install button"
       - "Enable network in wordpress with the instructions on the Create a Network of WordPress Sites screen"
-      - "Make sure pretty slug links works"

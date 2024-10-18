@@ -11,3 +11,10 @@
     owner: www-data
     group: www-data
     mode: u=-rw,g=+rw,o=+rw
+- name: Print message
+  ansible.builtin.debug:
+    msg:
+      - "wp-config.php and .htaccess modified"
+      - "Log into wordpress using the link on the page with the config instrutions"
+      - "Create a Network of WordPress Sites screen"
+      - "Go to at Administration > Tools > Network Setup"
