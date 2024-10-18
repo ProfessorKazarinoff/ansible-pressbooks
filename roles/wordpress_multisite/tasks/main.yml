@@ -1,0 +1,25 @@
+---
+# Print out a message to the user about the playbook that's running
+# and for the user to Verify that Pretty Permalinks work on your single WP instance.
+# Also deactivate all active plugins. You can reactivate them again after the network is created
+#
+- name: Print message
+  ansible.builtin.debug:
+    msg: Running wordpress_multisite.yml playbook. Pretty Permalinks must work and all plugins deactivated
+
+# copy:
+# /* Multisite */
+# define( 'WP_ALLOW_MULTISITE', true );
+# into  wp-config.php
+- name: Add definedefine('DB_PASSWORD', 'password'); to wp-config.php
+  ansible.builtin.lineinfile:
+    path: /var/www/html/wp-config.php
+    insertafter: "^/\\* That's all, stop editing! Happy publishing. \\*/"
+    line: "define( 'WP_ALLOW_MULTISITE', true );"
+- name: Print message
+  ansible.builtin.debug:
+    msg:
+      - "install a network in wordpress with admin -> tools -> network setup"
+      - "Enable network in wordpress with the instructions on the Create a Network of WordPress Sites screen"
+
+# 

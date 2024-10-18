@@ -4,12 +4,13 @@
   vars_files:
     - vars/default.yml
   roles:
-    - common
+    #- common
     #- nginx
-    - apache
-    - mysql
-    - php
-    - wordpress
+    #- apache
+    #- mysql
+    #- php
+    #- wordpress
     #- wordpress_multisite
+    #- wordpress_multisite2
     #- ssl
     #- pressbooks

@@ -1,0 +1,13 @@
+---
+- name: Add needed multisite conf after multisite install to wp-config.php
+  ansible.builtin.lineinfile:
+    path: /var/www/html/wp-config.php
+    insertbefore: "^/\\* That's all, stop editing! Happy publishing. \\*/"
+    line: "define( 'MULTISITE', true );\ndefine( 'SUBDOMAIN_INSTALL', false );\ndefine( 'DOMAIN_CURRENT_SITE', '{{ server_ip }}' );\ndefine( 'PATH_CURRENT_SITE', '/' );\ndefine( 'SITE_ID_CURRENT_SITE', 1 );\ndefine( 'BLOG_ID_CURRENT_SITE', 1 );"
+- name: Template a file to /var/www/html/.htaccess
+  ansible.builtin.template:
+    src: ../templates/.htaccess.j2
+    dest: /var/www/html/.htaccess
+    owner: www-data
+    group: www-data
+    mode: u=-rw,g=+rw,o=+rw

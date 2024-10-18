@@ -9,78 +9,79 @@
   ansible.builtin.get_url:
     url: https://github.com/pressbooks/pressbooks/releases/download/{{ pressbooks_version }}/pressbooks-{{ pressbooks_version }}.zip
     dest: /tmp/
+
 # 5. Copy the Pressbooks plugin folder to: /path/to/your/site/wp-content/plugins/*.
 - name: Unarchive a file that is already on the remote machine
   ansible.builtin.unarchive:
-    src: "pressbooks-{{ pressbooks_version }}.zip"
+    src: "/tmp/pressbooks-{{ pressbooks_version }}.zip"
     dest: "{{ webroot_path }}/wp-content/plugins"
     remote_src: yes
-# 2. Download Pressbooks Book theme
-# https://github.com/pressbooks/pressbooks-book/releases/download/{{ pressbooks_book_version }}/pressbooks-book-{{ pressbooks_book_version }}.zip
-- name: Download Pressbooks Book theme
-  ansible.builtin.get_url:
-    url: https://github.com/pressbooks/pressbooks-book/releases/download/{{ pressbooks_book_version }}/pressbooks-book-{{ pressbooks_book_version }}.zip
-    dest: /tmp/
-# 3. Download Aldine Book theme
-# https://github.com/pressbooks/pressbooks-aldine/releases/download/{{ pressbooks_aldine_version }}/pressbooks-aldine-{{ pressbooks_aldine_version }}.zip
-- name: Download Aldine Book theme
-  ansible.builtin.get_url:
-    url: https://github.com/pressbooks/pressbooks-aldine/releases/download/{{ pressbooks_aldine_version }}/pressbooks-aldine-{{ pressbooks_aldine_version }}.zip
-    dest: /tmp/
-# 4. Download the Clark Book theme
-# https://github.com/pressbooks/pressbooks-clarke/releases/download/{{ pressbooks_clarke_version }}/pressbooks-clarke-{{ pressbooks_clarke_version }}.zip
-- name: Download Clark Book theme
-  ansible.builtin.get_url:
-    url: https://github.com/pressbooks/pressbooks-clarke/releases/download/{{ pressbooks_clarke_version }}/pressbooks-clarke-{{ pressbooks_clarke_version }}.zip
-    dest: /tmp/
-# 6. Create /path/to/your/site/wp-content/mu-plugins/ directory if it doesn't yet exist.
-- name: Create the /wp-content/mu-plugins/ directory if it does not exist
-  ansible.builtin.file:
-    path: "{{ webroot_path }}/wp-content/mu-plugins/"
-    state: directory
-    owner: www-data
-    group: www-data
-# 7. Copy Pressbooks' autoloader file from
-# /path/to/your/site/wp-content/plugins/pressbooks/hm-autoloader.php 
-# to /path/to/your/site/wp-content/mu-plugins/hm-autoloader.php.
-- name: Copy file with owner and permissions
-  ansible.builtin.copy:
-    src: "{{ webroot_path }}/wp-content/plugins/pressbooks/hm-autoloader.php"
-    dest: "{{ webroot_path }}/wp-content/mu-plugins/hm-autoloader.php"
-    owner: www-data
-    group: www-data
-    remote_src: true
+# # 2. Download Pressbooks Book theme
+# # https://github.com/pressbooks/pressbooks-book/releases/download/{{ pressbooks_book_version }}/pressbooks-book-{{ pressbooks_book_version }}.zip
+# - name: Download Pressbooks Book theme
+#   ansible.builtin.get_url:
+#     url: https://github.com/pressbooks/pressbooks-book/releases/download/{{ pressbooks_book_version }}/pressbooks-book-{{ pressbooks_book_version }}.zip
+#     dest: /tmp/
+# # 3. Download Aldine Book theme
+# # https://github.com/pressbooks/pressbooks-aldine/releases/download/{{ pressbooks_aldine_version }}/pressbooks-aldine-{{ pressbooks_aldine_version }}.zip
+# - name: Download Aldine Book theme
+#   ansible.builtin.get_url:
+#     url: https://github.com/pressbooks/pressbooks-aldine/releases/download/{{ pressbooks_aldine_version }}/pressbooks-aldine-{{ pressbooks_aldine_version }}.zip
+#     dest: /tmp/
+# # 4. Download the Clark Book theme
+# # https://github.com/pressbooks/pressbooks-clarke/releases/download/{{ pressbooks_clarke_version }}/pressbooks-clarke-{{ pressbooks_clarke_version }}.zip
+# - name: Download Clark Book theme
+#   ansible.builtin.get_url:
+#     url: https://github.com/pressbooks/pressbooks-clarke/releases/download/{{ pressbooks_clarke_version }}/pressbooks-clarke-{{ pressbooks_clarke_version }}.zip
+#     dest: /tmp/
+# # 6. Create /path/to/your/site/wp-content/mu-plugins/ directory if it doesn't yet exist.
+# - name: Create the /wp-content/mu-plugins/ directory if it does not exist
+#   ansible.builtin.file:
+#     path: "{{ webroot_path }}/wp-content/mu-plugins/"
+#     state: directory
+#     owner: www-data
+#     group: www-data
+# # 7. Copy Pressbooks' autoloader file from
+# # /path/to/your/site/wp-content/plugins/pressbooks/hm-autoloader.php 
+# # to /path/to/your/site/wp-content/mu-plugins/hm-autoloader.php.
+# - name: Copy file with owner and permissions
+#   ansible.builtin.copy:
+#     src: "{{ webroot_path }}/wp-content/plugins/pressbooks/hm-autoloader.php"
+#     dest: "{{ webroot_path }}/wp-content/mu-plugins/hm-autoloader.php"
+#     owner: www-data
+#     group: www-data
+#     remote_src: true
 
-# 8. Copy the Pressbooks Book theme, Pressbooks Aldine theme and other theme folders to:
-# /path/to/your/site/wp-content/themes/*
-# (NOTE: theme folders must not have version numbers on the end. GOOD: pressbooks-aldine. BAD: pressbooks-aldine-3.1.0. Make sure that you rename the folders appropriately.)
-- name: Unarchive a file that is already on the remote machine
-  ansible.builtin.unarchive:
-    src: "/tmp/pressbooks-book-{{ pressbooks_book_version }}.zip"
-    dest: "{{ webroot_path }}/wp-content/themes/"
-    remote_src: yes
-- name: Check if the re-named dir exists
-  stat:
-    path: "{{ webroot_path }}/wp-content/themes/pressbooks-book"
-  register: dest_dir
-- name: Rename pressbooks-book-1.4.5 dir to pressbooks-book
-  command: "mv {{ webroot_path }}/wp-content/themes/pressbooks-book-{{ pressbooks_book_version }}/ {{ webroot_path }}/wp-content/themes/pressbooks-book/
-  when: not dest_dir.stat.exists
+# # 8. Copy the Pressbooks Book theme, Pressbooks Aldine theme and other theme folders to:
+# # /path/to/your/site/wp-content/themes/*
+# # (NOTE: theme folders must not have version numbers on the end. GOOD: pressbooks-aldine. BAD: pressbooks-aldine-3.1.0. Make sure that you rename the folders appropriately.)
+# - name: Unarchive a file that is already on the remote machine
+#   ansible.builtin.unarchive:
+#     src: "/tmp/pressbooks-book-{{ pressbooks_book_version }}.zip"
+#     dest: "{{ webroot_path }}/wp-content/themes/"
+#     remote_src: yes
+# - name: Check if the re-named dir exists
+#   stat:
+#     path: "{{ webroot_path }}/wp-content/themes/pressbooks-book"
+#   register: dest_dir
+# - name: Rename pressbooks-book-1.4.5 dir to pressbooks-book
+#   command: "mv {{ webroot_path }}/wp-content/themes/pressbooks-book-{{ pressbooks_book_version }}/ {{ webroot_path }}/wp-content/themes/pressbooks-book/
+#   when: not dest_dir.stat.exists
 
-# 9. Note for user to go to wordpress in browser and enable Pressbooks plugin and network enable
-# user also needs to network enable the themes in the Wordpress dashboard
-# Activate Plugins & Themes
-# Log out, log in, navigate to: My Sites → Network Admin → Dashboard.
-# Navigate to Plugins → Installed Plugins.
-# Network Enable "Pressbooks".
-# Navigate to Themes → Installed Themes.
-# Network Enable "Aldine", "McLuhan", and any other Pressbooks theme you want to use.
-# Navigate to Your Network Title → Dashboard → Appearance and activate "Aldine".
+# # 9. Note for user to go to wordpress in browser and enable Pressbooks plugin and network enable
+# # user also needs to network enable the themes in the Wordpress dashboard
+# # Activate Plugins & Themes
+# # Log out, log in, navigate to: My Sites → Network Admin → Dashboard.
+# # Navigate to Plugins -> Installed Plugins.
+# # Network Enable "Pressbooks".
+# # Navigate to Themes -> Installed Themes.
+# # Network Enable "Aldine", "McLuhan", and any other Pressbooks theme you want to use.
+# # Navigate to Your Network Title → Dashboard → Appearance and activate "Aldine".
 
-# Note for user to configure network settings
-# Navigate to Network Admin → Dashboard → Settings** → **Network Settings** and select the most appropriate Registration setting:
-# User accounts may be registered. (User accounts can be registered, but these users will not be able to create their own books)
-# Logged in users may register new sites. (Network administrators can add new users, who can then create their own books (i.e. sites)
-# Both sites and user accounts can be registered.
-# Note: (Allows visitors to your network to create their own accounts and then create their own books without central moderation.
-# If you choose this option, you will likely need to have good account and content moderation practices to avoid your network being flooded with spam.)
+# # Note for user to configure network settings
+# # Navigate to Network Admin → Dashboard → Settings** → **Network Settings** and select the most appropriate Registration setting:
+# # User accounts may be registered. (User accounts can be registered, but these users will not be able to create their own books)
+# # Logged in users may register new sites. (Network administrators can add new users, who can then create their own books (i.e. sites)
+# # Both sites and user accounts can be registered.
+# # Note: (Allows visitors to your network to create their own accounts and then create their own books without central moderation.
+# # If you choose this option, you will likely need to have good account and content moderation practices to avoid your network being flooded with spam.)
