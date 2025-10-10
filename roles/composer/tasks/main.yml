@@ -1,0 +1,12 @@
+# main.yml
+# an ansible role that installs the Wordpress CLI or wp-cli
+---
+# Print out a message to the user about the playbook that's running
+- name: Print message
+  ansible.builtin.debug:
+    msg: Running composer role. This role installs composer
+
+# copy the installer script at https://getcomposer.org/doc/faqs/how-to-install-composer-programmatically.md
+# then mv composer.phar to /usr/local/bin/composer
+# make sure composer.phar is executable before moving+renaming it
+# run the command "composer --version" and see the output

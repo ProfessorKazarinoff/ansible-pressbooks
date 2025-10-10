@@ -1,0 +1,32 @@
+# main.yml
+# an ansible role that installs the Wordpress CLI or wp-cli
+---
+# Print out a message to the user about the playbook that's running
+- name: Print message
+  ansible.builtin.debug:
+    msg: Running wp-cli role. This role installs the wordpress cli
+
+- name: Download wordpresss cli wp-cli.phar file
+  ansible.builtin.get_url:
+    url: https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+    dest: /usr/local/bin/
+    mode: '0775'
+
+- name: Copy file with owner and permissions
+  ansible.builtin.copy:
+    src: /usr/local/bin/wp-cli.phar
+    dest: /usr/local/bin/wp
+    remote_src: yes
+    mode: '0755'
+
+- name: Remove file (delete file)
+  ansible.builtin.file:
+    path: /usr/local/bin/wp-cli.phar
+    state: absent
+
+- name: Run the wp --info command to make sure the wordpress cli is installed
+  ansible.builtin.command: wp --info
+  register: wpcli_output
+- name: Show the wp-cli cli_output
+  debug:
+    var: wpcli_output.stdout_lines
