@@ -2,17 +2,17 @@
 # modify for each deployment
 ---
 user_name: my_user_name
-sys_packages: ['curl', 'wget', 'git', 'ufw','software-properties-common']
+sys_packages: ['curl', 'wget', 'git', 'ufw','unzip','software-properties-common','ghostscript','imagemagick','poppler-utils','epubcheck','epubcheck','libxml2-utils']
 mysql_user: my_mysql_user
 mysql_password: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 server_ip: XXX.XX.XX.XXX
 domain_name: mydomain.org
 email: user.name@domain.com
-php_version: "8.0"
-wordpress_version: "6.1.1"
+php_version: "8.2"
+wordpress_version: "6.8.3"
 wordpress_user: wordpress
 webroot_path: '/var/www/html'
-pressbooks_version: "6.20.4"
-pressbooks_book_version: "2.26.7"
-pressbooks_aldine_version: "1.19.2"
+pressbooks_version: "6.33.0"
+pressbooks_book_version: "2.30.3"
+pressbooks_aldine_version: "1.23.3"
 pressbooks_clarke_version: "2.4.1"
