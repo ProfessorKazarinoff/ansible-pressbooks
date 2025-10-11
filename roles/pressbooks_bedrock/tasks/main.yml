@@ -1,0 +1,13 @@
+# ansible role that installs php
+---
+# Print out a message to the user about the playbook that's running
+- name: Print message
+  ansible.builtin.debug:
+    msg: Running pressbooks_bedrock role main.yml playbook
+- name: Clone the repository
+  ansible.builtin.git:
+    repo: 'https://github.com/pressbooks/pressbooksoss-bedrock.git'  # Replace with your repository URL
+    dest: /var/www/html/bedrock/  # Replace with the desired path on the remote server
+    version: production  # Optional: specify a branch, tag, or commit hash
+    clone: yes  # Ensures the repository is cloned if it doesn't exist
+    update: yes  # Ensures the repository is updated if it already exists

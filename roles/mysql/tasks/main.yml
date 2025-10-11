@@ -61,7 +61,7 @@
     host: localhost
     state: absent
     login_unix_socket: /run/mysqld/mysqld.sock
-- name: Create a new database with name 'wpdb'
+- name: Create a new database with name <mysql_database_name> from vars/default.yml
   community.mysql.mysql_db:
     name: "{{ mysql_database_name }}"
     state: present

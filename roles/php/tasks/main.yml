@@ -9,31 +9,56 @@
     pkg: python3-apt
     state: present
     update_cache: true
-- name: Add ppa:ondrej/php repository into apt repository sources list
-  ansible.builtin.apt_repository:
-    validate_certs: no
-    repo: 'ppa:ondrej/php'
-    state: present
-    update_cache: yes
+#- name: Add ppa:ondrej/php repository into apt repository sources list
+#  ansible.builtin.apt_repository:
+#    validate_certs: no
+#    repo: 'ppa:ondrej/php'
+#    state: present
+#    update_cache: yes
 # Run apt update && apt upgrade
-- name: sudo apt update && sudo apt upgrade 
-  apt:
-    upgrade: yes
-    update_cache: yes
-# Install mysql-server and mysql-client with apt  
-- name: Install php with apt
+#- name: sudo apt update && sudo apt upgrade 
+#  apt:
+#    upgrade: yes
+#    update_cache: yes
+
+- name: Install php and php-related packages with apt
   apt:
     pkg:
-      - "php{{ php_version }}"
-      - "libapache2-mod-php{{ php_version }}"
-      - "php{{ php_version }}-mysql"
-      - "php{{ php_version }}-cli"
-      - "php{{ php_version }}-common"
-      - "php{{ php_version }}-opcache"
-      - "php{{ php_version }}-readline"
-      - "php{{ php_version }}-mbstring"
-      - "php{{ php_version }}-xml"
-      - "php{{ php_version }}-gd"
-      - "php{{ php_version }}-curl"
+      - php
+      - apache2-utils
+      - libapache2-mod-php
+      - php-mysql
+      - php-cli
+      - php-common
+      - php-readline
+      - php-mbstring
+      - php-xml
+      - php-gd
+      - php-curl
     state: latest
     update_cache: true
+
+# Install a specific version of php with apt
+#- name: Install php with apt
+#  apt:
+#    pkg:
+#      - "php{{ php_version }}"
+#      - "libapache2-mod-php{{ php_version }}"
+#      - "php{{ php_version }}-mysql"
+#      - "php{{ php_version }}-cli"
+#      - "php{{ php_version }}-common"
+#      - "php{{ php_version }}-opcache"
+#      - "php{{ php_version }}-readline"
+#      - "php{{ php_version }}-mbstring"
+#      - "php{{ php_version }}-xml"
+#      - "php{{ php_version }}-gd"
+#      - "php{{ php_version }}-curl"
+#    state: latest
+#    update_cache: true
+
+- name: Run the php --version command to make sure php is installed
+  ansible.builtin.command: php --version
+  register: php_output
+- name: Show the results of the php --version command
+  debug:
+    var: php_output.stdout_lines

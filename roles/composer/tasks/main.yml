@@ -6,7 +6,54 @@
   ansible.builtin.debug:
     msg: Running composer role. This role installs composer
 
-# copy the installer script at https://getcomposer.org/doc/faqs/how-to-install-composer-programmatically.md
+- name: Check if composer binary is already present
+  ansible.builtin.stat:
+    path: /usr/local/bin/composer
+  register: composer_binary_file_status
+
+- name: Report composer binary status if installed
+  ansible.builtin.debug:
+    msg: the composer binary is already installed
+  when: composer_binary_file_status.stat is defined and composer_binary_file_status.stat.exists
+
+- name: Report composer binary status if not installed
+  ansible.builtin.debug:
+    msg: the composer binary is not installed. Proceeeding with installation process
+  when: not composer_binary_file_status.stat.exists
+
+# copy the installer script
+- name: Copy the composer installer script file
+  ansible.builtin.copy:
+    src: composer_install.sh  # Ansible will look for this in the 'files' directory of the current role or relative to the playbook
+    dest: /tmp/composer_install.sh
+    owner: root
+    group: root
+    mode: '0777'
+  when: not composer_binary_file_status.stat.exists
+
+# run the composer installer script
+- name: Run a the composer installer shell script
+  shell: /tmp/composer_install.sh
+  when: not composer_binary_file_status.stat.exists
+
 # then mv composer.phar to /usr/local/bin/composer
-# make sure composer.phar is executable before moving+renaming it
-# run the command "composer --version" and see the output
+- name: Copy file with owner and permissions
+  ansible.builtin.copy:
+    src: /home/{{ user_name }}/composer.phar
+    dest: /usr/local/bin/composer
+    remote_src: yes
+    mode: '0755'
+  when: not composer_binary_file_status.stat.exists
+
+- name: Remove file (delete file)
+  ansible.builtin.file:
+    path: /home/{{ user_name }}/composer.phar
+    state: absent
+
+- name: Run a command that uses non-posix shell-isms (in this example /bin/sh doesn't handle redirection and wildcards together but bash does)
+  ansible.builtin.command: "sudo -u {{ user_name }} -i composer --version"
+  register: composer_output
+
+- name: Show the composer version command output
+  debug:
+    var: composer_output.stdout_lines
