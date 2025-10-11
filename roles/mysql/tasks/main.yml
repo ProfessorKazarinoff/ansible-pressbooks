@@ -33,20 +33,19 @@
 #     dest: /etc/mysql/mysql.conf.d/mysqld.cnf
 #     insertafter: '[mysqld]'
 #     line: "default_authentication_plugin=caching_sha2_password"
-- name: secure mysql with mysql_secure_installation script
-  become: yes
-  expect:
-    command: mysql_secure_installation
-    responses:
-      'Press y|Y for Yes, any other key for No:': 'y'
-      'Please enter 0 = LOW, 1 = MEDIUM and 2 = STRONG:': '1'
-      'Remove anonymous users? (Press y|Y for Yes, any other key for No) :': 'y'
-      'Disallow root login remotely? (Press y|Y for Yes, any other key for No) :': 'y'
-      'Remove test database and access to it? (Press y|Y for Yes, any other key for No) :': 'y'
-      'Reload privilege tables now? (Press y|Y for Yes, any other key for No) :': 'y'
-    timeout: 1
-  register: secure_mysql
-  failed_when: "'... Failed!' in secure_mysql.stdout_lines"
+#- name: secure mysql with mysql_secure_installation script
+#  become: yes
+#  expect:
+#    command: mysql_secure_installation
+#    responses:
+#      'Press y|Y for Yes, any other key for No:': 'y'
+#      'Please enter 0 = LOW, 1 = MEDIUM and 2 = STRONG:': '1'
+#      'Remove anonymous users? (Press y|Y for Yes, any other key for No) :': 'y'
+#      'Disallow root login remotely? (Press y|Y for Yes, any other key for No) :': 'y'
+#      'Remove test database and access to it? (Press y|Y for Yes, any other key for No) :': 'y'     'Reload privilege tables now? (Press y|Y for Yes, any other key for No) :': 'y'
+#    timeout: 1
+#  register: secure_mysql
+#  failed_when: "'... Failed!' in secure_mysql.stdout_lines"
 - name: restart mysql service
   service:
     name: mysql.service

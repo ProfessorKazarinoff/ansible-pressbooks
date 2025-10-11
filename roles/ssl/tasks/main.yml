@@ -51,6 +51,8 @@
   stat: path=/etc/letsencrypt/live/{{ domain_name }}/privkey.pem
   register: privkey_path
   # Run certbot to generate SSL cert
+
+# not working unless the apache2 .conf file is created and domain is in it.
 - name: Run certbot to generate SSL cert
   ansible.builtin.command: "certbot certonly --apache --noninteractive --standalone --agree-tos -d {{ domain_name }} -d www.{{ domain_name }} -m {{ email }}"
   when: not privkey_path.stat.exists and not fullchain_path.stat.exists

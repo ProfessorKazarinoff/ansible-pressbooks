@@ -64,4 +64,8 @@ After that you can try running it as your new user
 
 ```ansible-playbook prod.yml -u <user_name from vars/default.yml>```
 
-Comment and uncomment out roles in prod.yml to proceed with the installation.
+Comment and uncomment out roles in prod.yml to proceed with the installation. After the common role is run, comment it out and run other roles my uncommenting them. Run those roles with ```-u <user_name from vars/default.yml>``` and not root.
+
+Note: for some reason arrow keys weren't working over ssh the command below seemed to help:
+
+```sudo sh -c "if [ -e $(which bash) ]; then rm $(which sh) && ln -s $(which bash) /bin/sh; fi"```
