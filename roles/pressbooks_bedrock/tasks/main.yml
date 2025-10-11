@@ -7,7 +7,10 @@
 - name: Clone the repository
   ansible.builtin.git:
     repo: 'https://github.com/pressbooks/pressbooksoss-bedrock.git'  # Replace with your repository URL
-    dest: /var/www/html/bedrock/  # Replace with the desired path on the remote server
+    dest: "/var/www/{{ domain_name }}/  # Replace with the desired path on the remote server
     version: production  # Optional: specify a branch, tag, or commit hash
     clone: yes  # Ensures the repository is cloned if it doesn't exist
     update: yes  # Ensures the repository is updated if it already exists
+
+# need to mess around with the permissions of the /var/www/{{ domain_name }}/ directory
+# to make sure that wordpress can write to it.

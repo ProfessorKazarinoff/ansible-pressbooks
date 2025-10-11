@@ -4,14 +4,14 @@
   vars_files:
     - vars/default.yml
   roles:
-    #- common
+    - common
     #- nginx #recommended to skip and use acpache2 intead.
-    #- apache
-    #- mysql
-    #- php
-    #- wp-cli
-    #- composer
-    - pressbooks_bedrock
+    - apache
+    - mysql
+    - php
+    - wp-cli
+    - composer
+    #- pressbooks_bedrock
     #- wordpress
     #- wordpress_multisite
     #- wordpress_multisite2

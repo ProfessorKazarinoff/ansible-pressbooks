@@ -1,6 +1,6 @@
 # ansible-pressbooks
 
-A repo of ansible playbooks for deploying a Pressbooks instance on a Digital Ocean VPS. Tested on a Digital Ocean VM running Ubuntu 22.04 LTS
+A repo of ansible playbooks for deploying a Pressbooks instance on a Digital Ocean VPS. Tested on a Digital Ocean VM with 2GB of memory running Ubuntu 22.04 LTS
 
 ## Steps
 
