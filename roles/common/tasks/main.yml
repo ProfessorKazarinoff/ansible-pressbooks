@@ -26,6 +26,7 @@
 - name: Create a new regular user with sudo privileges
   user:
     name: "{{ user_name }}"
+    shell: /bin/bash
     state: present
     groups: sudo
     append: true
