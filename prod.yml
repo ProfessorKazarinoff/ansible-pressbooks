@@ -10,6 +10,6 @@
     #- php
     #- wp-cli
     #- composer
-    #- pressbooks_bedrock
+    - pressbooks_bedrock
     #- apache2_config
     #- ssl

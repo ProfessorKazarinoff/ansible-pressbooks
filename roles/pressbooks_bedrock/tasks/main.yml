@@ -1,4 +1,4 @@
-# ansible role that installs php
+# ansible role that installs pressbooks using the bedrocksso repo
 ---
 # Print out a message to the user about the playbook that's running
 - name: Print message
@@ -7,25 +7,23 @@
 
 - name: Clone the repository
   ansible.builtin.git:
-    repo: 'https://github.com/pressbooks/pressbooksoss-bedrock.git'  # Replace with your repository URL
-    dest: "/tmp/{{ domain_name }}/  # Replace with the desired path on the remote server
+    repo: "https://github.com/pressbooks/pressbooksoss-bedrock.git"  # Replace with your repository URL
+    dest: "/tmp/{{ domain_name }}/"
     version: production  # Optional: specify a branch, tag, or commit hash
     clone: yes  # Ensures the repository is cloned if it doesn't exist
     update: yes  # Ensures the repository is updated if it already exists
 
-# in /tmp run composer install
-# Copy the provided .env.example file to .env: cp .env.example .env
-# Update the relevant environment variables in your new .env file
-# Add salts to .env
+- name: Check if the bedrock folder is already present in var/www
+  ansible.builtin.stat:
+    path: "/var/www/{{ domain_name }}/composer"
+  register: bedrock_in_var_www_dir_status
 
-# Install WordPress multisite via CLI command
-# wp core multisite-install --url="https://example.com" --title="Your Network Title" --admin_user="username" --admin_password="password" --admin_email="youremail@example.com"
+- name: Report bedrock files are already in place in /var/www/
+  ansible.builtin.debug:
+    msg: the bedrock files are already in place in /var/www/
+  when: bedrock_in_var_www_dir_status.stat is defined and composer_binary_file_status.stat.exists
 
-# Activate Pressbooks and any desired themes and plugins via WP CLI, e.g. wp plugin activate pressbooks --network
-
-# copy from /tmp to /var/www/{{ site }}
-
-# change ownership and permissions of everyting in /var/www/{{ site }} to www-data
-
-# In a new playbook run certbot, because it put an apache config file with the old not multi-site pressbooks wordpress
-# apache2ctl -S was the magic command that showed /etc/apache2/sites-enabled/ocerte.org-le-ssl.conf was being used
+- name: Report bedrock files are not in place yet and need to be downloaded and moved
+  ansible.builtin.debug:
+    msg: the bredrock files are not in place and need to be downloaded and moved
+  when: not bedrock_in_var_www_dir_status.stat.exists
