@@ -4,13 +4,28 @@
 - name: Print message
   ansible.builtin.debug:
     msg: Running pressbooks_bedrock role main.yml playbook
+
 - name: Clone the repository
   ansible.builtin.git:
     repo: 'https://github.com/pressbooks/pressbooksoss-bedrock.git'  # Replace with your repository URL
-    dest: "/var/www/{{ domain_name }}/  # Replace with the desired path on the remote server
+    dest: "/tmp/{{ domain_name }}/  # Replace with the desired path on the remote server
     version: production  # Optional: specify a branch, tag, or commit hash
     clone: yes  # Ensures the repository is cloned if it doesn't exist
     update: yes  # Ensures the repository is updated if it already exists
 
-# need to mess around with the permissions of the /var/www/{{ domain_name }}/ directory
-# to make sure that wordpress can write to it.
+# in /tmp run composer install
+# Copy the provided .env.example file to .env: cp .env.example .env
+# Update the relevant environment variables in your new .env file
+# Add salts to .env
+
+# Install WordPress multisite via CLI command
+# wp core multisite-install --url="https://example.com" --title="Your Network Title" --admin_user="username" --admin_password="password" --admin_email="youremail@example.com"
+
+# Activate Pressbooks and any desired themes and plugins via WP CLI, e.g. wp plugin activate pressbooks --network
+
+# copy from /tmp to /var/www/{{ site }}
+
+# change ownership and permissions of everyting in /var/www/{{ site }} to www-data
+
+# In a new playbook run certbot, because it put an apache config file with the old not multi-site pressbooks wordpress
+# apache2ctl -S was the magic command that showed /etc/apache2/sites-enabled/ocerte.org-le-ssl.conf was being used

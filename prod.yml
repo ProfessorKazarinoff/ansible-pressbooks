@@ -5,15 +5,11 @@
     - vars/default.yml
   roles:
     #- common
-    #- nginx #recommended to skip and use apache2 intead.
     #- apache
     #- mysql
     #- php
     #- wp-cli
     #- composer
     #- pressbooks_bedrock
-    #- wordpress
-    #- wordpress_multisite
-    #- wordpress_multisite2
+    #- apache2_config
     #- ssl
-    #- pressbooks
