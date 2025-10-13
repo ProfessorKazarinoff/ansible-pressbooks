@@ -1,0 +1,11 @@
+# roles/apache2_config/tasks/main.yml
+---
+# Print out a message to the user about the playbook that's running
+- name: Print message
+  ansible.builtin.debug:
+    msg: Running initial-server-setup.yml playbook
+
+# make the apache2 config in the /etc/apache2/sites-available dir
+
+# in /etc/apache2/apache2.conf add ServerName 127.0.0.1 to the bottom of the file
+# in /etc/apache2/mods-enabled/dir.conf put index.php first
