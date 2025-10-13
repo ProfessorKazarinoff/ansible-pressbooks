@@ -10,7 +10,9 @@ domain_name: mydomain.org
 email: user.name@domain.com
 php_version: "8.2"
 wordpress_version: "6.8.3"
-wordpress_user: wordpress
+wordpress_admin_user: wordpress
+wordpress_admin_user_password: "XXXXXXXXXXXXXXXXX"
+wordpress_admin_user_email: user.name@domain.com
 webroot_path: '/var/www/html'
 pressbooks_version: "6.33.0"
 pressbooks_book_version: "2.30.3"
