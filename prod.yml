@@ -4,12 +4,12 @@
   vars_files:
     - vars/default.yml
   roles:
-    #- common
+    - common
     #- apache
     #- mysql
     #- php
     #- wp-cli
     #- composer
-    - pressbooks_bedrock
+    #- pressbooks_bedrock
     #- apache2_config
     #- ssl
