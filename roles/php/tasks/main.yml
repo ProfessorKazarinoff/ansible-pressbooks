@@ -35,6 +35,11 @@
       - php-xml
       - php-gd
       - php-curl
+      - php-gd
+      - php-xmlrpc
+      - php-soap
+      - php-intl
+      - php-zip
     state: latest
     update_cache: true
 

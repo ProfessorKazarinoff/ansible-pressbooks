@@ -2,7 +2,7 @@
 # modify for each deployment
 ---
 user_name: my_user_name
-sys_packages: ['curl', 'wget', 'git', 'ufw','unzip','software-properties-common','ghostscript','imagemagick','poppler-utils','epubcheck','epubcheck','libxml2-utils']
+sys_packages: ['curl', 'wget', 'git', 'ufw','unzip','software-properties-common','ghostscript','imagemagick','poppler-utils','epubcheck','epubcheck','libxml2-utils','certbot','python3-certbot-apache']
 mysql_user: my_mysql_user
 mysql_password: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 server_ip: XXX.XX.XX.XXX
