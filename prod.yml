@@ -6,10 +6,10 @@
   roles:
     - common
     #- apache
+    #- apache2_config
     #- mysql
     #- php
     #- wp-cli
     #- composer
-    #- pressbooks_bedrock
-    #- apache2_config
     #- ssl
+    #- bedrock

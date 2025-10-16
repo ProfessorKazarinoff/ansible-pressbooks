@@ -4,7 +4,8 @@
   apt:
     update_cache: yes
     cache_valid_time: 86400 #one day
-# Install mysql-server and mysql-client with apt  
+
+# Install certbot with apt  
 - name: Install certbot and python3-certbot-apache with apt
   apt:
     pkg:
@@ -12,56 +13,30 @@
       - python3-certbot-apache
     state: latest
     update_cache: true
-# sudo nano /etc/apache2/sites-available/your_domain.conf
-# in your_domain.conf
-# ...
-# ServerName your_domain
-# ServerAlias www.your_domain
-#...
 
-- name: Test the apache2 config
-  ansible.builtin.command: "apache2ctl configtest"
-
-# reload the apache2 service
-- name: Restart apache2 service
-  service:
-    name: apache2
-    state: restarted
-# ufw allow 'Apache Full'
-- name: UFW - Allow Apache Full, so port 80 and port 443 are allowed
+- name: UFW - Allow "Apache Full"
   community.general.ufw:
     rule: allow
-    name: "Apache Full"
+    name: Apache Full
+
 # ufw delete allow 'Apache'
 - name: UFW - Delete "Apache" profile
   community.general.ufw:
     rule: allow
     name: "Apache"
     delete: true
-# run certbot
-# but only run if
-# /etc/letsencrypt/live/your_domain/fullchain.pem
-# /etc/letsencrypt/live/your_domain/privkey.pem
-# don't exhist yet
-  # Check if fullchain.pem files already exhist on the server
-- name: Check if fullchain.pem and privkey.pem files already exhists on the server
-  stat: path=/etc/letsencrypt/live/{{ domain_name }}/fullchain.pem
-  register: fullchain_path
-- name: Check if privkey.pem files exhists
-  stat: path=/etc/letsencrypt/live/{{ domain_name }}/privkey.pem
-  register: privkey_path
-  # Run certbot to generate SSL cert
 
-# not working unless the apache2 .conf file is created and domain is in it.
-- name: Run certbot to generate SSL cert
-  ansible.builtin.command: "certbot certonly --apache --noninteractive --standalone --agree-tos -d {{ domain_name }} -d www.{{ domain_name }} -m {{ email }}"
-  when: not privkey_path.stat.exists and not fullchain_path.stat.exists
-  register: certbot_stdout 
+- name: Obtain/renew SSL certificates with Certbot for Apache
+  ansible.builtin.command: "certbot --apache -d {{ domain_name }} -d www.{{ domain_name}} --noninteractive --agree-tos -m {{ email }}"
+  become: true
+  args:
+    creates: /etc/letsencrypt/live/example.com/fullchain.pem # Prevents running if cert exists
+  register: certbot_output
 
-- name: print out the certbot output
-  debug:
-    var: certbot_stdout.stdout_lines
-    when: certbot_stdout
+- name: Print command output if it exists
+  ansible.builtin.debug:
+    msg: "certbot command output: {{ certbot_output.stdout }}"
+  when: certbot_output | length > 0
 
 # systemctl status certbot.timer is running
 - name: Ensure the certbot.timer system service is running

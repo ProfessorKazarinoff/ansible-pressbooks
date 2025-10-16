@@ -3,9 +3,61 @@
 # Print out a message to the user about the playbook that's running
 - name: Print message
   ansible.builtin.debug:
-    msg: Running initial-server-setup.yml playbook
+    msg: Running apache2_config.yml playbook
+- name: Create the /var/www/<my_domanin>/web directory  
+  ansible.builtin.file:
+    path: /var/www/{{ domain_name }}/web
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: '0755'
+    recurse: yes # Create parent directories if they don't exist
 
-# make the apache2 config in the /etc/apache2/sites-available dir
+- name: Template a file to /var/www/domain/web/index.html
+  ansible.builtin.template:
+    src: index.j2
+    dest: /var/www/{{ domain_name }}/web/index.html
+    owner: www-data
+    group: www-data
+    mode: '0644'
 
-# in /etc/apache2/apache2.conf add ServerName 127.0.0.1 to the bottom of the file
+- name: Template a file to /etc/apache2/sites-available/domain.conf
+  ansible.builtin.template:
+    src: apache2_vhost.j2
+    dest: /etc/apache2/sites-available/{{ domain_name }}.conf
+    owner: www-data
+    group: www-data
+    mode: '0744'
+
+- name: Enable Apache site
+  command: "a2ensite {{ domain_name }}"
+  become: true
+  args:
+    creates: /etc/apache2/sites-enabled/{{ domain_name }}.conf
+
+- name: Disable default Apache site
+  command: a2dissite 000-default.conf
+  become: true
+
+- name: Add a new line to the end of the file
+  ansible.builtin.lineinfile:
+    path: /etc/apache2/apache2.conf
+    line: "ServerName 127.0.0.1"
+    state: present
+    create: true
+
+- name: check if the apache2 config has errors
+  ansible.builtin.command: apache2ctl configtest
+  register: apache2ctl_configtest_output
+  become: true
+
+- name: apache2ctl configtest command output
+  debug:
+    var: apache2ctl_configtest_output.stdout_lines
+
+- name: Restart Apache2 service
+  ansible.builtin.service:
+    name: apache2
+    state: restarted
+
 # in /etc/apache2/mods-enabled/dir.conf put index.php first

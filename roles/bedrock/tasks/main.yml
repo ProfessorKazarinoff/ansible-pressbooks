@@ -1,0 +1,107 @@
+# ansible role that installs a bedrock wordpress site
+---
+
+# Print out a message to the user about the playbook that's running
+- name: Print message
+  ansible.builtin.debug:
+    msg: Running bedrock role main.yml playbook
+
+- name: Add user 'user_name' to 'www-data' group
+  ansible.builtin.user:
+    name: "{{ user_name }}"
+    groups: www-data
+    append: yes
+    state: present
+  become: yes # Required for managing users and groups
+
+#composer create-project roots/bedrock /home/peter/ocerte.org
+- name: Run composer create-project
+  ansible.builtin.command: "composer create-project roots/bedrock /home/peter/{{ domain_name }}"
+  args:
+    creates: /home/peter/{{ domain_name }} # Prevents running if dir exists
+  register: composer_output
+
+- name: Print command output if it exists
+  ansible.builtin.debug:
+    msg: "composer command output: {{ composer_output.stdout }}"
+  when: composer_output | length > 0
+
+- name: Check if the bedrock folder is already present in var/www
+  ansible.builtin.stat:
+    path: "/var/www/{{ domain_name }}/app"
+  register: bedrock_in_var_www_dir_status
+
+- name: Report bedrock files are already in place in /var/www/domain/web/app
+  ansible.builtin.debug:
+    msg: the bedrock files are already in place in /var/www//var/www/domain/web/app
+  when: bedrock_in_var_www_dir_status.stat is defined and bedrock_in_var_www_dir_status.stat.exists
+
+- name: Report bedrock files are not in place yet and need to be downloaded and moved
+  ansible.builtin.debug:
+    msg: the bredrock files are not in place and need to be downloaded and moved
+  when: not bedrock_in_var_www_dir_status.stat.exists
+
+- name: Generate a 64-character random string with various characters
+  ansible.builtin.set_fact:
+    auth_key_salt: "{{ lookup('community.general.random_string', length=64, upper=true, lower=true, numbers=true, override_special=sp_chars) }}"
+  vars:
+    sp_chars: '?.,:;+=_-*&^%$#@!`~'
+
+- name: print random chars from function
+  ansible.builtin.debug:
+    msg: "{{ auth_key_salt }}"
+
+- name: Generate a 64-character random string with various characters
+  ansible.builtin.set_fact:
+    secure_auth_key_salt: "{{ lookup('community.general.random_string', length=64, upper=true, lower=true, numbers=true, override_special=sp_chars) }}"
+  vars:
+    sp_chars: '?.,:;+=_-*&^%$#@!`~'
+
+- name: print random chars from function
+  ansible.builtin.debug:
+    msg: "{{ secure_auth_key_salt }}"
+
+- name: Generate a 64-character random string with various characters
+  ansible.builtin.set_fact:
+    logged_in_key_salt:  "{{ lookup('community.general.random_string', length=64, upper=true, lower=true, numbers=true, override_special=sp_chars) }}"
+  vars:
+    sp_chars: '?.,:;+=_-*&^%$#@!`~'
+- name: Generate a 64-character random string with various characters
+  ansible.builtin.set_fact:
+    nonce_key_salt:  "{{ lookup('community.general.random_string', length=64, upper=true, lower=true, numbers=true, override_special=sp_chars) }}"
+  vars:
+    sp_chars: '?.,:;+=_-*&^%$#@!`~'
+- name: Generate a 64-character random string with various characters
+  ansible.builtin.set_fact:
+    auth_salt:  "{{ lookup('community.general.random_string', length=64, upper=true, lower=true, numbers=true, override_special=sp_chars) }}"
+  vars:
+    sp_chars: '?.,:;+=_-*&^%$#@!`~'
+- name: Generate a 64-character random string with various characters
+  ansible.builtin.set_fact:
+    secure_auth_salt:  "{{ lookup('community.general.random_string', length=64, upper=true, lower=true, numbers=true, override_special=sp_chars) }}"
+  vars:
+    sp_chars: '?.,:;+=_-*&^%$#@!`~'
+- name: Generate a 64-character random string with various characters
+  ansible.builtin.set_fact:
+    logged_in_salt:  "{{ lookup('community.general.random_string', length=64, upper=true, lower=true, numbers=true, override_special=sp_chars) }}"
+  vars:
+    sp_chars: '?.,:;+=_-*&^%$#@!`~'
+- name: Generate a 64-character random string with various characters
+  ansible.builtin.set_fact:
+    nonce_salt:  "{{ lookup('community.general.random_string', length=64, upper=true, lower=true, numbers=true, override_special=sp_chars) }}"
+  vars:
+    sp_chars: '?.,:;+=_-*&^%$#@!`~'
+
+- name: Template a file to /home/user/domain/.env
+  ansible.builtin.template:
+    src: .env.j2
+    dest: "/home/{{user_name}}/{{ domain_name }}/.env"
+    owner: "{{ user_name }}"
+    group: "{{ user_name }}"
+    mode: '0744'
+
+# wp cli install
+# cp to /var/www
+# chown www-data:www-data
+# permissions for dirs
+# permissions for files

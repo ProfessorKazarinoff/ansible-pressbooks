@@ -1,16 +1,24 @@
 # ansible-pressbooks
 
-A repo of ansible playbooks for deploying a Pressbooks instance on a Digital Ocean VPS. Tested on a Digital Ocean VM with 2GB of memory running Ubuntu 22.04 LTS
+A repo of ansible playbooks for deploying a Pressbooks instance on a Digital Ocean VPS. Tested on a Digital Ocean VM with 2GB of memory running Ubuntu 24.04 (LTS) x64
 
 ## Steps
 
 Initial Server Setup - apt update, new user, pressbooks user
 
+Apache2 install
+
+Apache2 configuration
+
 MySQL Setup
 
 Wordpress Setup
 
-Nginx Setup
+Install php
+
+Install wordpress cli
+
+Install composer
 
 Certbot Setup
 
@@ -18,7 +26,7 @@ Pressbooks Setup
 
 ## Tutorial
 
-Create vm. Digital Ocean is used for testing.
+Create vm. Link domain to vm with A records and AAAA records.
 
 copy inventory-example file and save as inventory
 
@@ -60,11 +68,13 @@ try and run the initial server setup playbook
 
 ```ansible-playbook prod.yml -u root```
 
-After that you can try running it as your new user
+After that try running the same playbook as your new user
 
 ```ansible-playbook prod.yml -u <user_name from vars/default.yml>```
 
 Comment and uncomment out roles in prod.yml to proceed with the installation. After the common role is run, comment it out and run other roles my uncommenting them. Run those roles with ```-u <user_name from vars/default.yml>``` and not root.
+
+After the ssl playbook navigate to https://your_domain.com and see if the index.html file shows correctly.
 
 Note: for some reason arrow keys weren't working over ssh the command below seemed to help:
 
