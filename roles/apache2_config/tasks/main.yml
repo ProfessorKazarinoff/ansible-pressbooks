@@ -55,9 +55,16 @@
   debug:
     var: apache2ctl_configtest_output.stdout_lines
 
+# in /etc/apache2/mods-enabled/dir.conf put index.php first
+- name: Replace a specific line in a file
+  ansible.builtin.lineinfile:
+    path: /etc/apache2/mods-enabled/dir.conf
+    regexp: '^#DirectoryIndex index.html index.cgi index.pl index.php index.xhtml index.htm' # Regular expression to match the line to be replaced
+    line: 'DirectoryIndex index.php index.html index.cgi index.pl index.xhtml index.htm'     # The new content of the line
+    state: present                  # Ensure the line is present (replaces if regexp matches)
+  become: yes
+
 - name: Restart Apache2 service
   ansible.builtin.service:
     name: apache2
     state: restarted
-
-# in /etc/apache2/mods-enabled/dir.conf put index.php first
