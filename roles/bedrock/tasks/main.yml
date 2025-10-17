@@ -161,3 +161,8 @@
 #     path: /var/www/{{ domain_name }}/web/index.html
 #     state: absent
 #   become: true
+
+# after the basic wordpress installation is made and it is confirmed that you can login, create pages, view pages, etc
+# Then try the wp cli command: wp core multisite-convert    
+# which Transforms an existing single-site installation into a multisite installation.
+# see https://developer.wordpress.org/cli/commands/core/multisite-convert/ for docs
