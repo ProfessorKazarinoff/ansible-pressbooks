@@ -13,6 +13,7 @@ wordpress_version: "6.8.3"
 wordpress_admin_user: wordpress
 wordpress_admin_user_password: "XXXXXXXXXXXXXXXXX"
 wordpress_admin_user_email: user.name@domain.com
+wordpress_network_title: "my network title"
 webroot_path: '/var/www/html'
 pressbooks_version: "6.33.0"
 pressbooks_book_version: "2.30.3"

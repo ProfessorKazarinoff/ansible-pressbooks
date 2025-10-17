@@ -12,8 +12,6 @@ Apache2 configuration
 
 MySQL Setup
 
-Wordpress Setup
-
 Install php
 
 Install wordpress cli

@@ -16,7 +16,7 @@
 
 #composer create-project roots/bedrock /home/peter/ocerte.org
 - name: Run composer create-project
-  ansible.builtin.command: "composer create-project roots/bedrock /home/peter/{{ domain_name }}"
+  ansible.builtin.command: "sudo -u {{ user_name }} -i composer create-project roots/bedrock /home/peter/{{ domain_name }}"
   args:
     creates: /home/peter/{{ domain_name }} # Prevents running if dir exists
   register: composer_output
@@ -100,7 +100,19 @@
     group: "{{ user_name }}"
     mode: '0744'
 
-# wp cli install
+
+
+# # wp cli install
+# - name: Run the wp --info command to make sure the wordpress cli is installed
+#   ansible.builtin.command: "sudo -u {{ user_name }} -i -- wp core multisite-install --path=/home/{{ user_name }}/{{ domain_name }} --url='{{ domain_name }}' --title='{{ wordpress_network_title }}' --admin_user='{{ wordpress_admin_user }}' --admin_password='{{ wordpress_admin_user_password }}' --admin_email='{{ wordpress_admin_user_email }}'"
+#   register: wpcli_output
+# - name: Show the wp-cli cli_output
+#   debug:
+#     var: wpcli_output.stdout_lines
+
+# 
+
+# copy config to .env
 # cp to /var/www
 # chown www-data:www-data
 # permissions for dirs
