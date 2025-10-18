@@ -1,5 +1,5 @@
 # main.yml
-# an ansible role that installs the Wordpress CLI or wp-cli
+# an ansible role that installs the Composer CLI
 ---
 # Print out a message to the user about the playbook that's running
 - name: Print message
@@ -51,7 +51,11 @@
     state: absent
 
 - name: Run a command that uses non-posix shell-isms (in this example /bin/sh doesn't handle redirection and wildcards together but bash does)
-  ansible.builtin.command: "sudo -u {{ user_name }} -i composer --version"
+  ansible.builtin.command: "composer --version"
+  args:
+    chdir: "/home/{{ user_name }}"
+  become: yes
+  become_user: "{{ user_name }}"
   register: composer_output
 
 - name: Show the composer version command output

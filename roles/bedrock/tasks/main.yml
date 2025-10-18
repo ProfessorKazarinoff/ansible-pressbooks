@@ -100,23 +100,33 @@
     group: "{{ user_name }}"
     mode: '0744'
 
+# multi-site does not seem to be working yet
+# possibly need to add the multisite stuff to config/application.php as in
+# https://github.com/pressbooks/pressbooksoss-bedrock/blob/production/config/application.php
+# had trouble logging in after loggin out, and first time logging in was not multisite
 - name: Run wp cli to install wordpress core
   command:
     argv:
       - /usr/local/bin/wp
       - core
-      - install
-      - --url="{{ domain_name }}"
-      - --title="{{ wordpress_network_title }}"
-      - --admin_user="{{ wordpress_admin_user }}"
-      - --admin_password="{{ wordpress_admin_user_password }}"
-      - --admin_email="{{ wordpress_admin_user_email }}"
+      - multisite-install
+      - --url={{ domain_name }}
+      - --title={{ wordpress_network_title }}
+      - --admin_user={{ wordpress_admin_user }}
+      - --admin_password={{ wordpress_admin_user_password }}
+      - --admin_email={{ wordpress_admin_user_email }}
   args:
     chdir: "/home/{{ user_name }}/{{ domain_name }}/"
   become: yes
   become_user: "{{ user_name }}"
   register: wp_cli_core_install_output
 
+# show the wp cli output
+- name: Show the wp-cli cli_output
+  debug:
+    var: wp_cli_core_install_output.stdout_lines
+
+# maybe need to modify the .htaccess file
 - name: Create an empty file in /home/user/domain/web/.htaccess
   ansible.builtin.file:
     path: /home/{{ user_name }}/{{ domain_name }}/web/.htaccess
@@ -124,14 +134,6 @@
     owner: "{{ user_name }}"
     group: "{{ user_name}}"
     mode: '0644'
-
-#   ansible.builtin.command: "sudo -u {{ user_name }} -i -- wp core multisite-install --path=/home/{{ user_name }}/{{ domain_name }} --url='{{ domain_name }}' --title='{{ wordpress_network_title }}' --admin_user='{{ wordpress_admin_user }}' --admin_password='{{ wordpress_admin_user_password }}' --admin_email='{{ wordpress_admin_user_email }}'"
-#   register: wpcli_output
-
-# show the wp cli output
-- name: Show the wp-cli cli_output
-  debug:
-    var: wp_cli_core_install_output.stdout_lines
 
 - name: /home/user/domain/ dir to /var/www/domain
   ansible.builtin.copy:
@@ -156,11 +158,11 @@
   become: yes
 
 # see if this is still needed if in apache2 config role index.php will be looked at first
-# - name: remove the /var/www/domain/web/index.html file so that index.php for wordpress is used instead
-#   ansible.builtin.file:
-#     path: /var/www/{{ domain_name }}/web/index.html
-#     state: absent
-#   become: true
+- name: remove the /var/www/domain/web/index.html file so that index.php for wordpress is used instead
+  ansible.builtin.file:
+    path: /var/www/{{ domain_name }}/web/index.html
+    state: absent
+  become: true
 
 # after the basic wordpress installation is made and it is confirmed that you can login, create pages, view pages, etc
 # Then try the wp cli command: wp core multisite-convert
