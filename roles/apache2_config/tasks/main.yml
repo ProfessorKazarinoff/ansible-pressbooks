@@ -53,7 +53,7 @@
 
 - name: apache2ctl configtest command output
   debug:
-    var: apache2ctl_configtest_output.stdout_lines
+    var: apache2ctl_configtest_output.stdout
 
 # in /etc/apache2/mods-enabled/dir.conf put index.php first
 - name: Replace a specific line in a file
@@ -61,6 +61,14 @@
     path: /etc/apache2/mods-enabled/dir.conf
     regexp: '^#DirectoryIndex index.html index.cgi index.pl index.php index.xhtml index.htm' # Regular expression to match the line to be replaced
     line: 'DirectoryIndex index.php index.html index.cgi index.pl index.xhtml index.htm'     # The new content of the line
+    state: present                  # Ensure the line is present (replaces if regexp matches)
+  become: yes
+
+# in /etc/apache2/mods-enabled/dir.conf put index.php first
+- name: Add the line "127.0.01 <domain>" to /etc/cloud/templates/hosts.debian.tmpl 
+  ansible.builtin.lineinfile:
+    path: /etc/cloud/templates/hosts.debian.tmpl
+    line: '127.0.0.1 {{ domain_name }}'    # The new line
     state: present                  # Ensure the line is present (replaces if regexp matches)
   become: yes
 

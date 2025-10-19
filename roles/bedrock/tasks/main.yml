@@ -100,69 +100,69 @@
     group: "{{ user_name }}"
     mode: '0744'
 
-# multi-site does not seem to be working yet
-# possibly need to add the multisite stuff to config/application.php as in
-# https://github.com/pressbooks/pressbooksoss-bedrock/blob/production/config/application.php
-# had trouble logging in after loggin out, and first time logging in was not multisite
-- name: Run wp cli to install wordpress core
-  command:
-    argv:
-      - /usr/local/bin/wp
-      - core
-      - multisite-install
-      - --url={{ domain_name }}
-      - --title={{ wordpress_network_title }}
-      - --admin_user={{ wordpress_admin_user }}
-      - --admin_password={{ wordpress_admin_user_password }}
-      - --admin_email={{ wordpress_admin_user_email }}
-  args:
-    chdir: "/home/{{ user_name }}/{{ domain_name }}/"
-  become: yes
-  become_user: "{{ user_name }}"
-  register: wp_cli_core_install_output
+# # multi-site does not seem to be working yet
+# # possibly need to add the multisite stuff to config/application.php as in
+# # https://github.com/pressbooks/pressbooksoss-bedrock/blob/production/config/application.php
+# # had trouble logging in after loggin out, and first time logging in was not multisite
+# - name: Run wp cli to install wordpress core
+#   command:
+#     argv:
+#       - /usr/local/bin/wp
+#       - core
+#       - multisite-install
+#       - --url={{ domain_name }}
+#       - --title={{ wordpress_network_title }}
+#       - --admin_user={{ wordpress_admin_user }}
+#       - --admin_password={{ wordpress_admin_user_password }}
+#       - --admin_email={{ wordpress_admin_user_email }}
+#   args:
+#     chdir: "/home/{{ user_name }}/{{ domain_name }}/"
+#   become: yes
+#   become_user: "{{ user_name }}"
+#   register: wp_cli_core_install_output
 
-# show the wp cli output
-- name: Show the wp-cli cli_output
-  debug:
-    var: wp_cli_core_install_output.stdout_lines
+# # show the wp cli output
+# - name: Show the wp-cli cli_output
+#   debug:
+#     var: wp_cli_core_install_output.stdout_lines
 
-# maybe need to modify the .htaccess file
-- name: Create an empty file in /home/user/domain/web/.htaccess
-  ansible.builtin.file:
-    path: /home/{{ user_name }}/{{ domain_name }}/web/.htaccess
-    state: touch
-    owner: "{{ user_name }}"
-    group: "{{ user_name}}"
-    mode: '0644'
+# # maybe need to modify the .htaccess file
+# - name: Create an empty file in /home/user/domain/web/.htaccess
+#   ansible.builtin.file:
+#     path: /home/{{ user_name }}/{{ domain_name }}/web/.htaccess
+#     state: touch
+#     owner: "{{ user_name }}"
+#     group: "{{ user_name}}"
+#     mode: '0644'
 
-- name: /home/user/domain/ dir to /var/www/domain
-  ansible.builtin.copy:
-    src: /home/{{ user_name }}/{{ domain_name }}/.
-    dest: /var/www/{{ domain_name }}
-    follow: yes
-    remote_src: yes
-    owner: www-data
-    group: www-data
-    mode: '0750'
+# - name: /home/user/domain/ dir to /var/www/domain
+#   ansible.builtin.copy:
+#     src: /home/{{ user_name }}/{{ domain_name }}/.
+#     dest: /var/www/{{ domain_name }}
+#     follow: yes
+#     remote_src: yes
+#     owner: www-data
+#     group: www-data
+#     mode: '0750'
 
-- name: Set permissions on all directories within a parent directory
-  ansible.builtin.file:
-    path: "/var/www/{{ domain_name }}"
-    state: directory
-    mode: '0755' # Example: rwxr-xr-x for directories
-    recurse: yes
-  become: yes # Use 'become: yes' if elevated privileges are required
+# - name: Set permissions on all directories within a parent directory
+#   ansible.builtin.file:
+#     path: "/var/www/{{ domain_name }}"
+#     state: directory
+#     mode: '0755' # Example: rwxr-xr-x for directories
+#     recurse: yes
+#   become: yes # Use 'become: yes' if elevated privileges are required
 
-- name: set permissions for files in /var/www/domain to 0644   
-  ansible.builtin.command: find /var/www/{{ domain_name }} -type f ! -perm 0644 -exec chmod 0644 {} \;
-  become: yes
+# - name: set permissions for files in /var/www/domain to 0644   
+#   ansible.builtin.command: find /var/www/{{ domain_name }} -type f ! -perm 0644 -exec chmod 0644 {} \;
+#   become: yes
 
-# see if this is still needed if in apache2 config role index.php will be looked at first
-- name: remove the /var/www/domain/web/index.html file so that index.php for wordpress is used instead
-  ansible.builtin.file:
-    path: /var/www/{{ domain_name }}/web/index.html
-    state: absent
-  become: true
+# # see if this is still needed if in apache2 config role index.php will be looked at first
+# - name: remove the /var/www/domain/web/index.html file so that index.php for wordpress is used instead
+#   ansible.builtin.file:
+#     path: /var/www/{{ domain_name }}/web/index.html
+#     state: absent
+#   become: true
 
 # after the basic wordpress installation is made and it is confirmed that you can login, create pages, view pages, etc
 # Then try the wp cli command: wp core multisite-convert
@@ -170,3 +170,60 @@
 # which Transforms an existing single-site installation into a multisite installation.
 # see https://developer.wordpress.org/cli/commands/core/multisite-convert/ for docs
 # maybe do multi-site from the get go
+
+# Need to add to var/www/domain/web/config/application.php
+
+# define( 'WP_ALLOW_MULTISITE', true );
+# define( 'MULTISITE', true );
+# define( 'SUBDOMAIN_INSTALL', false );
+# $base = '/';
+# define( 'DOMAIN_CURRENT_SITE', 'ocerte.org' );
+# define( 'PATH_CURRENT_SITE', '/' );
+# define( 'SITE_ID_CURRENT_SITE', 1 );
+# define( 'BLOG_ID_CURRENT_SITE', 1 );
+
+# in /home/user/domain/.htaccess
+
+# # .htaccess in your project root (e.g., /var/www/your-site/.htaccess)
+
+# <IfModule mod_rewrite.c>
+#   RewriteEngine On
+#   RewriteBase /
+#   RewriteRule ^index\.php$ - [L]
+#   RewriteCond %{REQUEST_URI} !^/web/
+#   RewriteRule ^(.*)$ web/$1 [L]
+# </IfModule>
+
+# in /home/user/domain/web/.htaccess
+
+# # .htaccess in your web/ directory (e.g., /var/www/your-site/web/.htaccess)
+
+# # BEGIN WordPress
+# <IfModule mod_rewrite.c>
+#   RewriteEngine On
+#   RewriteBase /
+
+#   # Multisite Rules (choose Subdomains or Subdirectories based on your setup)
+
+#   # For Subdomains:
+#   # RewriteRule ^index\.php$ - [L]
+#   # RewriteCond %{REQUEST_FILENAME} !-f
+#   # RewriteCond %{REQUEST_FILENAME} !-d
+#   # RewriteRule ^([_0-9a-zA-Z-]+/)?(wp-(content|admin|includes).*) wp/$2 [L]
+#   # RewriteCond %{REQUEST_FILENAME} !-f
+#   # RewriteCond %{REQUEST_FILENAME} !-d
+#   # RewriteRule ^([_0-9a-zA-Z-]+/)?(.*\.php)$ wp/$2 [L]
+#   # RewriteRule . index.php [L]
+
+#   # For Subdirectories:
+#   RewriteRule ^index\.php$ - [L]
+#   RewriteCond %{REQUEST_FILENAME} !-f
+#   RewriteCond %{REQUEST_FILENAME} !-d
+#   RewriteRule ^([_0-9a-zA-Z-]+/)?(wp-(content|admin|includes).*) wp/$2 [L]
+#   RewriteCond %{REQUEST_FILENAME} !-f
+#   RewriteCond %{REQUEST_FILENAME} !-d
+#   RewriteRule ^([_0-9a-zA-Z-]+/)?(.*\.php)$ wp/$2 [L]
+#   RewriteRule . index.php [L]
+
+# </IfModule>
+# # END WordPress
