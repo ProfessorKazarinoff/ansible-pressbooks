@@ -169,3 +169,6 @@ inventory
 ansible.cfg
 inventory.ini
 vars/default.yml
+
+# This project
+.doctl
