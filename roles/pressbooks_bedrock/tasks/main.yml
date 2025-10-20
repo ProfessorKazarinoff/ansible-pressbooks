@@ -5,14 +5,6 @@
   ansible.builtin.debug:
     msg: Running pressbooks_bedrock role main.yml playbook
 
-- name: Clone the repository
-  ansible.builtin.git:
-    repo: "https://github.com/pressbooks/pressbooksoss-bedrock.git"  # Replace with your repository URL
-    dest: "/home/{{ user_name }}/{{ domain_name }}/"
-    version: production  # Optional: specify a branch, tag, or commit hash
-    clone: yes  # Ensures the repository is cloned if it doesn't exist
-    update: yes  # Ensures the repository is updated if it already exists
-
 - name: Check if the bedrock folder is already present in var/www
   ansible.builtin.stat:
     path: "/var/www/{{ domain_name }}/"
@@ -28,16 +20,232 @@
     msg: the bredrock files are not in place and need to be downloaded and moved
   when: not bedrock_in_var_www_dir_status.stat.exists
 
-- name: Run a command that uses non-posix shell-isms (in this example /bin/sh doesn't handle redirection and wildcards together but bash does)
-  ansible.builtin.command: "composer install --working-dir=/home/{{ user_name }}/{{ domain_name }}/"
+- name: Check if the bedrock folder is already present in home/user/domain
+  ansible.builtin.stat:
+    path: "home/{{ user_name }}/{{ domain_name }}/"
+  register: bedrock_in_home_dir_status
+
+- name: Clone the repository
+  ansible.builtin.git:
+    repo: "https://github.com/pressbooks/pressbooksoss-bedrock.git"  # Replace with your repository URL
+    dest: "/home/{{ user_name }}/{{ domain_name }}/"
+    version: production  # Optional: specify a branch, tag, or commit hash
+    clone: yes  # Ensures the repository is cloned if it doesn't exist
+    update: yes  # Ensures the repository is updated if it already exists
+  become: yes
+  become_user: "{{ user_name }}"
+  when: not bedrock_in_home_dir_status.stat.exists or not bedrock_in_var_www_dir_status.stat.exists 
+
+# - name: Add safe directory to global git config
+#   ansible.builtin.command: git config --global --add safe.directory /home/{{ user_name }}/{{ domain_name }}
+#   args:
+#     chdir: /home/{{ user_name }}/
+#   become: yes # Use become if you need elevated privileges to modify the global git config
+
+# - name: Add safe directory to global git config using git_config module
+#   ansible.builtin.git_config:
+#     name: safe.directory
+#     value: "/home/{{ user_name }}/{{ domain_name }}"
+#     scope: global
+#     state: present
+#   become: yes # Use become if you need elevated privileges
+
+- name: Run the composer install cli command
+  command: composer install
+  args:
+    chdir: "/home/{{ user_name }}/{{ domain_name }}/"
+  become: yes
+  become_user: "{{ user_name }}"
   register: composer_output
 
-- name: Print the composer install command output
+- name: Report the composer output
   ansible.builtin.debug:
-    msg: "{{ composer_output.stdout }}"
+    msg: "composer command output: {{ composer_output.stdout }}"
 
-# - name: copy .env-example as .env add config details
+- name: Generate a 64-character random string with various characters
+  ansible.builtin.set_fact:
+    auth_key_salt: "{{ lookup('community.general.random_string', length=64, upper=true, lower=true, numbers=true, override_special=sp_chars) }}"
+  vars:
+    sp_chars: '?.,:;+=_-*&^%$#@!`~'
 
-# run wp core multisite-install --url="https://example.com" --title="Your Network Title" --admin_user="username" --admin_password="password" --admin_email="youremail@example.com"
+- name: print random chars from function
+  ansible.builtin.debug:
+    msg: "{{ auth_key_salt }}"
 
-# run wp plugin activate pressbooks --network
+- name: Generate a 64-character random string with various characters
+  ansible.builtin.set_fact:
+    secure_auth_key_salt: "{{ lookup('community.general.random_string', length=64, upper=true, lower=true, numbers=true, override_special=sp_chars) }}"
+  vars:
+    sp_chars: '?.,:;+=_-*&^%$#@!`~'
+
+- name: print random chars from function
+  ansible.builtin.debug:
+    msg: "{{ secure_auth_key_salt }}"
+
+- name: Generate a 64-character random string with various characters
+  ansible.builtin.set_fact:
+    logged_in_key_salt:  "{{ lookup('community.general.random_string', length=64, upper=true, lower=true, numbers=true, override_special=sp_chars) }}"
+  vars:
+    sp_chars: '?.,:;+=_-*&^%$#@!`~'
+- name: Generate a 64-character random string with various characters
+  ansible.builtin.set_fact:
+    nonce_key_salt:  "{{ lookup('community.general.random_string', length=64, upper=true, lower=true, numbers=true, override_special=sp_chars) }}"
+  vars:
+    sp_chars: '?.,:;+=_-*&^%$#@!`~'
+- name: Generate a 64-character random string with various characters
+  ansible.builtin.set_fact:
+    auth_salt:  "{{ lookup('community.general.random_string', length=64, upper=true, lower=true, numbers=true, override_special=sp_chars) }}"
+  vars:
+    sp_chars: '?.,:;+=_-*&^%$#@!`~'
+- name: Generate a 64-character random string with various characters
+  ansible.builtin.set_fact:
+    secure_auth_salt:  "{{ lookup('community.general.random_string', length=64, upper=true, lower=true, numbers=true, override_special=sp_chars) }}"
+  vars:
+    sp_chars: '?.,:;+=_-*&^%$#@!`~'
+- name: Generate a 64-character random string with various characters
+  ansible.builtin.set_fact:
+    logged_in_salt:  "{{ lookup('community.general.random_string', length=64, upper=true, lower=true, numbers=true, override_special=sp_chars) }}"
+  vars:
+    sp_chars: '?.,:;+=_-*&^%$#@!`~'
+- name: Generate a 64-character random string with various characters
+  ansible.builtin.set_fact:
+    nonce_salt:  "{{ lookup('community.general.random_string', length=64, upper=true, lower=true, numbers=true, override_special=sp_chars) }}"
+  vars:
+    sp_chars: '?.,:;+=_-*&^%$#@!`~'
+
+- name: Template a file to /home/user/domain/.env
+  ansible.builtin.template:
+    src: .env.j2
+    dest: "/home/{{user_name}}/{{ domain_name }}/.env"
+    owner: "{{ user_name }}"
+    group: "{{ user_name }}"
+    mode: '0744'
+
+# multi-site does not seem to be working yet
+# possibly need to add the multisite stuff to config/application.php as in
+# https://github.com/pressbooks/pressbooksoss-bedrock/blob/production/config/application.php
+# had trouble logging in after loggin out, and first time logging in was not multisite
+- name: Run wp cli to install wordpress multisite
+  command:
+    argv:
+      - /usr/local/bin/wp
+      - core
+      - multisite-install
+      - --url={{ domain_name }}
+      - --title={{ wordpress_network_title }}
+      - --admin_user={{ wordpress_admin_user }}
+      - --admin_password={{ wordpress_admin_user_password }}
+      - --admin_email={{ wordpress_admin_user_email }}
+  args:
+    chdir: "/home/{{ user_name }}/{{ domain_name }}/"
+  become: yes
+  become_user: "{{ user_name }}"
+  register: wp_cli_core_install_output
+
+# show the wp cli output
+- name: Show the wp-cli cli_output
+  debug:
+    var: wp_cli_core_install_output.stdout_lines
+
+# had trouble logging in after loggin out, and first time logging in was not multisite
+- name: Run wp cli to install pressbooks
+  command:
+    argv:
+      - /usr/local/bin/wp
+      - plugin
+      - activate 
+      - pressbooks
+      - --network
+  args:
+    chdir: "/home/{{ user_name }}/{{ domain_name }}/"
+  become: yes
+  become_user: "{{ user_name }}"
+  register: wp_cli_pressbooks_install_output
+
+# show the wp cli output
+- name: Show the wp-cli cli_output
+  debug:
+    var: wp_cli_pressbooks_install_output.stdout_lines
+
+- name: Template a file to /home/user/domain/web/.htaccess
+  ansible.builtin.template:
+    src: .htaccess.j2
+    dest: "/home/{{user_name}}/{{ domain_name }}/web/.htaccess"
+    owner: "{{ user_name }}"
+    group: "{{ user_name }}"
+    mode: '0744'
+
+- name: copy /home/user/domain/ dir to /var/www/domain
+  ansible.builtin.copy:
+    src: /home/{{ user_name }}/{{ domain_name }}/.
+    dest: /var/www/{{ domain_name }}
+    follow: yes
+    remote_src: yes
+    owner: www-data
+    group: www-data
+    mode: '0750'
+
+- name: Set permissions on all directories in /var/www/domain_name
+  ansible.builtin.file:
+    path: "/var/www/{{ domain_name }}"
+    state: directory
+    mode: '0755' # Example: rwxr-xr-x for directories
+    recurse: yes
+  become: yes # Use 'become: yes' if elevated privileges are required
+
+- name: set permissions for files in /var/www/domain to 0644   
+  ansible.builtin.command: find /var/www/{{ domain_name }} -type f ! -perm 0644 -exec chmod 0644 {} \;
+  become: yes
+
+# see if this is still needed if in apache2 config role index.php will be looked at first
+- name: remove the /var/www/domain/web/index.html file so that index.php for wordpress is used instead
+  ansible.builtin.file:
+    path: /var/www/{{ domain_name }}/web/index.html
+    state: absent
+  become: true
+
+# not working still
+
+# # .htaccess in your project root (e.g., /var/www/your-site/.htaccess)
+
+# <IfModule mod_rewrite.c>
+#   RewriteEngine On
+#   RewriteBase /
+#   RewriteRule ^index\.php$ - [L]
+#   RewriteCond %{REQUEST_URI} !^/web/
+#   RewriteRule ^(.*)$ web/$1 [L]
+# </IfModule>
+
+# in /home/user/domain/web/.htaccess
+
+# # .htaccess in your web/ directory (e.g., /var/www/your-site/web/.htaccess)
+
+# # BEGIN WordPress
+# <IfModule mod_rewrite.c>
+#   RewriteEngine On
+#   RewriteBase /
+
+#   # Multisite Rules (choose Subdomains or Subdirectories based on your setup)
+
+#   # For Subdomains:
+#   # RewriteRule ^index\.php$ - [L]
+#   # RewriteCond %{REQUEST_FILENAME} !-f
+#   # RewriteCond %{REQUEST_FILENAME} !-d
+#   # RewriteRule ^([_0-9a-zA-Z-]+/)?(wp-(content|admin|includes).*) wp/$2 [L]
+#   # RewriteCond %{REQUEST_FILENAME} !-f
+#   # RewriteCond %{REQUEST_FILENAME} !-d
+#   # RewriteRule ^([_0-9a-zA-Z-]+/)?(.*\.php)$ wp/$2 [L]
+#   # RewriteRule . index.php [L]
+
+#   # For Subdirectories:
+#   RewriteRule ^index\.php$ - [L]
+#   RewriteCond %{REQUEST_FILENAME} !-f
+#   RewriteCond %{REQUEST_FILENAME} !-d
+#   RewriteRule ^([_0-9a-zA-Z-]+/)?(wp-(content|admin|includes).*) wp/$2 [L]
+#   RewriteCond %{REQUEST_FILENAME} !-f
+#   RewriteCond %{REQUEST_FILENAME} !-d
+#   RewriteRule ^([_0-9a-zA-Z-]+/)?(.*\.php)$ wp/$2 [L]
+#   RewriteRule . index.php [L]
+
+# </IfModule>
+# # END WordPress
