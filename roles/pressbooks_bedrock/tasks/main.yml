@@ -36,20 +36,6 @@
   become_user: "{{ user_name }}"
   when: not bedrock_in_home_dir_status.stat.exists or not bedrock_in_var_www_dir_status.stat.exists 
 
-# - name: Add safe directory to global git config
-#   ansible.builtin.command: git config --global --add safe.directory /home/{{ user_name }}/{{ domain_name }}
-#   args:
-#     chdir: /home/{{ user_name }}/
-#   become: yes # Use become if you need elevated privileges to modify the global git config
-
-# - name: Add safe directory to global git config using git_config module
-#   ansible.builtin.git_config:
-#     name: safe.directory
-#     value: "/home/{{ user_name }}/{{ domain_name }}"
-#     scope: global
-#     state: present
-#   become: yes # Use become if you need elevated privileges
-
 - name: Run the composer install cli command
   command: composer install
   args:
@@ -113,6 +99,11 @@
   vars:
     sp_chars: '?.,:;+=_-*&^%$#@!`~'
 
+- name: Check if the env file is present in home/user/domain/.env
+  ansible.builtin.stat:
+    path: "/home/{{user_name}}/{{ domain_name }}/.env"
+  register: env_file_status
+
 - name: Template a file to /home/user/domain/.env
   ansible.builtin.template:
     src: .env.j2
@@ -120,11 +111,12 @@
     owner: "{{ user_name }}"
     group: "{{ user_name }}"
     mode: '0744'
+  when: not env_file_status.stat.exists
 
-# multi-site does not seem to be working yet
-# possibly need to add the multisite stuff to config/application.php as in
-# https://github.com/pressbooks/pressbooksoss-bedrock/blob/production/config/application.php
-# had trouble logging in after loggin out, and first time logging in was not multisite
+#multi-site does not seem to be working yet
+#possibly need to add the multisite stuff to config/application.php as in
+#https://github.com/pressbooks/pressbooksoss-bedrock/blob/production/config/application.php
+#had trouble logging in after loggin out, and first time logging in was not multisite
 - name: Run wp cli to install wordpress multisite
   command:
     argv:
@@ -147,13 +139,12 @@
   debug:
     var: wp_cli_core_install_output.stdout_lines
 
-# had trouble logging in after loggin out, and first time logging in was not multisite
 - name: Run wp cli to install pressbooks
   command:
     argv:
       - /usr/local/bin/wp
       - plugin
-      - activate 
+      - activate
       - pressbooks
       - --network
   args:
@@ -167,13 +158,13 @@
   debug:
     var: wp_cli_pressbooks_install_output.stdout_lines
 
-- name: Template a file to /home/user/domain/web/.htaccess
-  ansible.builtin.template:
-    src: .htaccess.j2
-    dest: "/home/{{user_name}}/{{ domain_name }}/web/.htaccess"
-    owner: "{{ user_name }}"
-    group: "{{ user_name }}"
-    mode: '0744'
+# - name: Template a file to /home/user/domain/web/.htaccess
+#   ansible.builtin.template:
+#     src: .htaccess.j2
+#     dest: "/home/{{user_name}}/{{ domain_name }}/web/.htaccess"
+#     owner: "{{ user_name }}"
+#     group: "{{ user_name }}"
+#     mode: '0744'
 
 - name: copy /home/user/domain/ dir to /var/www/domain
   ansible.builtin.copy:
@@ -190,8 +181,6 @@
     path: "/var/www/{{ domain_name }}"
     state: directory
     mode: '0755' # Example: rwxr-xr-x for directories
-    recurse: yes
-  become: yes # Use 'become: yes' if elevated privileges are required
 
 - name: set permissions for files in /var/www/domain to 0644   
   ansible.builtin.command: find /var/www/{{ domain_name }} -type f ! -perm 0644 -exec chmod 0644 {} \;
@@ -204,7 +193,7 @@
     state: absent
   become: true
 
-# not working still
+# not working still, think need to add .htaccess file. Site comes up but can't log in.
 
 # # .htaccess in your project root (e.g., /var/www/your-site/.htaccess)
 
