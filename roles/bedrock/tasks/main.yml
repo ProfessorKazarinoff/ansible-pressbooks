@@ -14,11 +14,12 @@
     state: present
   become: yes # Required for managing users and groups
 
-#composer create-project roots/bedrock /home/peter/ocerte.org
-- name: Run composer create-project
-  ansible.builtin.command: "sudo -u {{ user_name }} -i composer create-project roots/bedrock /home/peter/{{ domain_name }}"
+- name: Run the composer create-project cli command
+  command: "composer create-project roots/bedrock /home/peter/{{ domain_name }}"
   args:
-    creates: /home/peter/{{ domain_name }} # Prevents running if dir exists
+    chdir: "/home/{{ user_name }}"
+  become: yes
+  become_user: "{{ user_name }}"
   register: composer_output
 
 - name: Print command output if it exists
@@ -100,31 +101,31 @@
     group: "{{ user_name }}"
     mode: '0744'
 
-# # multi-site does not seem to be working yet
-# # possibly need to add the multisite stuff to config/application.php as in
-# # https://github.com/pressbooks/pressbooksoss-bedrock/blob/production/config/application.php
-# # had trouble logging in after loggin out, and first time logging in was not multisite
-# - name: Run wp cli to install wordpress core
-#   command:
-#     argv:
-#       - /usr/local/bin/wp
-#       - core
-#       - multisite-install
-#       - --url={{ domain_name }}
-#       - --title={{ wordpress_network_title }}
-#       - --admin_user={{ wordpress_admin_user }}
-#       - --admin_password={{ wordpress_admin_user_password }}
-#       - --admin_email={{ wordpress_admin_user_email }}
-#   args:
-#     chdir: "/home/{{ user_name }}/{{ domain_name }}/"
-#   become: yes
-#   become_user: "{{ user_name }}"
-#   register: wp_cli_core_install_output
+# multi-site does not seem to be working yet
+# possibly need to add the multisite stuff to config/application.php as in
+# https://github.com/pressbooks/pressbooksoss-bedrock/blob/production/config/application.php
+# had trouble logging in after loggin out, and first time logging in was not multisite
+- name: Run wp cli to install wordpress core
+  command:
+    argv:
+      - /usr/local/bin/wp
+      - core
+      - install
+      - --url={{ domain_name }}
+      - --title={{ wordpress_network_title }}
+      - --admin_user={{ wordpress_admin_user }}
+      - --admin_password={{ wordpress_admin_user_password }}
+      - --admin_email={{ wordpress_admin_user_email }}
+  args:
+    chdir: "/home/{{ user_name }}/{{ domain_name }}/"
+  become: yes
+  become_user: "{{ user_name }}"
+  register: wp_cli_core_install_output
 
-# # show the wp cli output
-# - name: Show the wp-cli cli_output
-#   debug:
-#     var: wp_cli_core_install_output.stdout_lines
+# show the wp cli output
+- name: Show the wp-cli cli_output
+  debug:
+    var: wp_cli_core_install_output.stdout_lines
 
 # # maybe need to modify the .htaccess file
 # - name: Create an empty file in /home/user/domain/web/.htaccess
@@ -135,34 +136,34 @@
 #     group: "{{ user_name}}"
 #     mode: '0644'
 
-# - name: /home/user/domain/ dir to /var/www/domain
-#   ansible.builtin.copy:
-#     src: /home/{{ user_name }}/{{ domain_name }}/.
-#     dest: /var/www/{{ domain_name }}
-#     follow: yes
-#     remote_src: yes
-#     owner: www-data
-#     group: www-data
-#     mode: '0750'
+- name: /home/user/domain/ dir to /var/www/domain
+  ansible.builtin.copy:
+    src: /home/{{ user_name }}/{{ domain_name }}/.
+    dest: /var/www/{{ domain_name }}
+    follow: yes
+    remote_src: yes
+    owner: www-data
+    group: www-data
+    mode: '0750'
 
-# - name: Set permissions on all directories within a parent directory
-#   ansible.builtin.file:
-#     path: "/var/www/{{ domain_name }}"
-#     state: directory
-#     mode: '0755' # Example: rwxr-xr-x for directories
-#     recurse: yes
-#   become: yes # Use 'become: yes' if elevated privileges are required
+- name: Set permissions on all directories within a parent directory
+  ansible.builtin.file:
+    path: "/var/www/{{ domain_name }}"
+    state: directory
+    mode: '0755' # Example: rwxr-xr-x for directories
+    recurse: yes
+  become: yes # Use 'become: yes' if elevated privileges are required
 
-# - name: set permissions for files in /var/www/domain to 0644   
-#   ansible.builtin.command: find /var/www/{{ domain_name }} -type f ! -perm 0644 -exec chmod 0644 {} \;
-#   become: yes
+- name: set permissions for files in /var/www/domain to 0644   
+  ansible.builtin.command: find /var/www/{{ domain_name }} -type f ! -perm 0644 -exec chmod 0644 {} \;
+  become: yes
 
-# # see if this is still needed if in apache2 config role index.php will be looked at first
-# - name: remove the /var/www/domain/web/index.html file so that index.php for wordpress is used instead
-#   ansible.builtin.file:
-#     path: /var/www/{{ domain_name }}/web/index.html
-#     state: absent
-#   become: true
+# see if this is still needed if in apache2 config role index.php will be looked at first
+- name: remove the /var/www/domain/web/index.html file so that index.php for wordpress is used instead
+  ansible.builtin.file:
+    path: /var/www/{{ domain_name }}/web/index.html
+    state: absent
+  become: true
 
 # after the basic wordpress installation is made and it is confirmed that you can login, create pages, view pages, etc
 # Then try the wp cli command: wp core multisite-convert

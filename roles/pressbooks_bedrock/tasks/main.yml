@@ -139,24 +139,24 @@
   debug:
     var: wp_cli_core_install_output.stdout_lines
 
-- name: Run wp cli to install pressbooks
-  command:
-    argv:
-      - /usr/local/bin/wp
-      - plugin
-      - activate
-      - pressbooks
-      - --network
-  args:
-    chdir: "/home/{{ user_name }}/{{ domain_name }}/"
-  become: yes
-  become_user: "{{ user_name }}"
-  register: wp_cli_pressbooks_install_output
+# - name: Run wp cli to install pressbooks
+#   command:
+#     argv:
+#       - /usr/local/bin/wp
+#       - plugin
+#       - activate
+#       - pressbooks
+#       - --network
+#   args:
+#     chdir: "/home/{{ user_name }}/{{ domain_name }}/"
+#   become: yes
+#   become_user: "{{ user_name }}"
+#   register: wp_cli_pressbooks_install_output
 
-# show the wp cli output
-- name: Show the wp-cli cli_output
-  debug:
-    var: wp_cli_pressbooks_install_output.stdout_lines
+# # show the wp cli output
+# - name: Show the wp-cli cli_output
+#   debug:
+#     var: wp_cli_pressbooks_install_output.stdout_lines
 
 # - name: Template a file to /home/user/domain/web/.htaccess
 #   ansible.builtin.template:
