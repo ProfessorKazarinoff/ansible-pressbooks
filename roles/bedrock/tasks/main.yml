@@ -101,6 +101,24 @@
     group: "{{ user_name }}"
     mode: '0744'
 
+# - name: Insert a block of text in a file
+#   ansible.builtin.blockinfile:
+#     path: /home/{{user_name}}/{{ domain_name }}/config/application.php
+#     marker: "{mark}$table_prefix = env('DB_PREFIX') ?: 'wp_';"
+#     insertafter: "'wp_';"
+#     block: |
+#               /**
+#               * Multisite Network
+#               */
+#               Config::define( 'WP_ALLOW_MULTISITE', true );
+#               Config::define( 'MULTISITE', true );
+#               Config::define( 'SUBDOMAIN_INSTALL', false );
+#               $base = '/';
+#               Config::define( 'DOMAIN_CURRENT_SITE', 'ocerte.org' );
+#               Config::define( 'PATH_CURRENT_SITE', '/' );
+#               Config::define( 'SITE_ID_CURRENT_SITE', 1 );
+#               Config::define( 'BLOG_ID_CURRENT_SITE', 1 );
+
 # multi-site does not seem to be working yet
 # possibly need to add the multisite stuff to config/application.php as in
 # https://github.com/pressbooks/pressbooksoss-bedrock/blob/production/config/application.php
@@ -187,13 +205,13 @@
 
 # # .htaccess in your project root (e.g., /var/www/your-site/.htaccess)
 
-# <IfModule mod_rewrite.c>
-#   RewriteEngine On
-#   RewriteBase /
-#   RewriteRule ^index\.php$ - [L]
-#   RewriteCond %{REQUEST_URI} !^/web/
-#   RewriteRule ^(.*)$ web/$1 [L]
-# </IfModule>
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  RewriteRule ^index\.php$ - [L]
+  RewriteCond %{REQUEST_URI} !^/web/
+  RewriteRule ^(.*)$ web/$1 [L]
+</IfModule>
 
 # in /home/user/domain/web/.htaccess
 
