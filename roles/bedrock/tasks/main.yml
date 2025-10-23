@@ -14,18 +14,28 @@
     state: present
   become: yes # Required for managing users and groups
 
-- name: Run the composer create-project cli command
-  command: "composer create-project roots/bedrock /home/peter/{{ domain_name }}"
-  args:
-    chdir: "/home/{{ user_name }}"
-  become: yes
-  become_user: "{{ user_name }}"
-  register: composer_output
+# check if the /home/user/domain dir exists
+- name: Check if the bedrock folder is already present in var/www
+  ansible.builtin.stat:
+    path: /home/{{ user_name }}/{{ domain_name }}
+  register: bedrock_in_home_dir_status
 
-- name: Print command output if it exists
-  ansible.builtin.debug:
-    msg: "composer command output: {{ composer_output.stdout }}"
-  when: composer_output | length > 0
+- block:
+  - name: Run the composer create-project cli command
+    command: "composer create-project roots/bedrock /home/{{ user_name }}/{{ domain_name }}"
+    args:
+      chdir: "/home/{{ user_name }}"
+    become: yes
+    become_user: "{{ user_name }}"
+    register: composer_output
+
+  - name: Print command output if it exists
+    ansible.builtin.debug:
+      msg: "composer command output: {{ composer_output.stdout }}"
+  when: not bedrock_in_home_dir_status.stat.exists
+
+
+# If bedrock multisite works, then try and use composer to install pressbooks dependancies
 
 - name: Check if the bedrock folder is already present in var/www
   ansible.builtin.stat:
@@ -58,30 +68,30 @@
   vars:
     sp_chars: '?.,:;+=_-*&^%$#@!`~'
 
-- name: print random chars from function
-  ansible.builtin.debug:
-    msg: "{{ secure_auth_key_salt }}"
-
 - name: Generate a 64-character random string with various characters
   ansible.builtin.set_fact:
     logged_in_key_salt:  "{{ lookup('community.general.random_string', length=64, upper=true, lower=true, numbers=true, override_special=sp_chars) }}"
   vars:
     sp_chars: '?.,:;+=_-*&^%$#@!`~'
+
 - name: Generate a 64-character random string with various characters
   ansible.builtin.set_fact:
     nonce_key_salt:  "{{ lookup('community.general.random_string', length=64, upper=true, lower=true, numbers=true, override_special=sp_chars) }}"
   vars:
     sp_chars: '?.,:;+=_-*&^%$#@!`~'
+
 - name: Generate a 64-character random string with various characters
   ansible.builtin.set_fact:
     auth_salt:  "{{ lookup('community.general.random_string', length=64, upper=true, lower=true, numbers=true, override_special=sp_chars) }}"
   vars:
     sp_chars: '?.,:;+=_-*&^%$#@!`~'
+
 - name: Generate a 64-character random string with various characters
   ansible.builtin.set_fact:
     secure_auth_salt:  "{{ lookup('community.general.random_string', length=64, upper=true, lower=true, numbers=true, override_special=sp_chars) }}"
   vars:
     sp_chars: '?.,:;+=_-*&^%$#@!`~'
+
 - name: Generate a 64-character random string with various characters
   ansible.builtin.set_fact:
     logged_in_salt:  "{{ lookup('community.general.random_string', length=64, upper=true, lower=true, numbers=true, override_special=sp_chars) }}"
@@ -145,15 +155,7 @@
   debug:
     var: wp_cli_core_install_output.stdout_lines
 
-# # maybe need to modify the .htaccess file
-# - name: Create an empty file in /home/user/domain/web/.htaccess
-#   ansible.builtin.file:
-#     path: /home/{{ user_name }}/{{ domain_name }}/web/.htaccess
-#     state: touch
-#     owner: "{{ user_name }}"
-#     group: "{{ user_name}}"
-#     mode: '0644'
-
+# copy the bedrock dir from home/user/domain to /var/www/domain
 - name: /home/user/domain/ dir to /var/www/domain
   ansible.builtin.copy:
     src: /home/{{ user_name }}/{{ domain_name }}/.
@@ -205,13 +207,13 @@
 
 # # .htaccess in your project root (e.g., /var/www/your-site/.htaccess)
 
-<IfModule mod_rewrite.c>
-  RewriteEngine On
-  RewriteBase /
-  RewriteRule ^index\.php$ - [L]
-  RewriteCond %{REQUEST_URI} !^/web/
-  RewriteRule ^(.*)$ web/$1 [L]
-</IfModule>
+# <IfModule mod_rewrite.c>
+#   RewriteEngine On
+#   RewriteBase /
+#   RewriteRule ^index\.php$ - [L]
+#   RewriteCond %{REQUEST_URI} !^/web/
+#   RewriteRule ^(.*)$ web/$1 [L]
+# </IfModule>
 
 # in /home/user/domain/web/.htaccess
 
