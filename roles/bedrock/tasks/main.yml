@@ -6,14 +6,6 @@
   ansible.builtin.debug:
     msg: Running bedrock role main.yml playbook
 
-- name: Add user 'user_name' to 'www-data' group
-  ansible.builtin.user:
-    name: "{{ user_name }}"
-    groups: www-data
-    append: yes
-    state: present
-  become: yes # Required for managing users and groups
-
 # check if the /home/user/domain dir exists
 - name: Check if the bedrock folder is already present in var/www
   ansible.builtin.stat:
@@ -111,24 +103,6 @@
     group: "{{ user_name }}"
     mode: '0744'
 
-# - name: Insert a block of text in a file
-#   ansible.builtin.blockinfile:
-#     path: /home/{{user_name}}/{{ domain_name }}/config/application.php
-#     marker: "{mark}$table_prefix = env('DB_PREFIX') ?: 'wp_';"
-#     insertafter: "'wp_';"
-#     block: |
-#               /**
-#               * Multisite Network
-#               */
-#               Config::define( 'WP_ALLOW_MULTISITE', true );
-#               Config::define( 'MULTISITE', true );
-#               Config::define( 'SUBDOMAIN_INSTALL', false );
-#               $base = '/';
-#               Config::define( 'DOMAIN_CURRENT_SITE', 'ocerte.org' );
-#               Config::define( 'PATH_CURRENT_SITE', '/' );
-#               Config::define( 'SITE_ID_CURRENT_SITE', 1 );
-#               Config::define( 'BLOG_ID_CURRENT_SITE', 1 );
-
 # multi-site does not seem to be working yet
 # possibly need to add the multisite stuff to config/application.php as in
 # https://github.com/pressbooks/pressbooksoss-bedrock/blob/production/config/application.php
@@ -138,7 +112,7 @@
     argv:
       - /usr/local/bin/wp
       - core
-      - install
+      - multisite-install
       - --url={{ domain_name }}
       - --title={{ wordpress_network_title }}
       - --admin_user={{ wordpress_admin_user }}
@@ -154,6 +128,47 @@
 - name: Show the wp-cli cli_output
   debug:
     var: wp_cli_core_install_output.stdout_lines
+
+# copy over .htaccess-project-root to /home/user/domain/.htaccess
+- name: Copy file .htaccess-project-root to /home/user/domain/.htaccess
+  ansible.builtin.copy:
+    src: .htaccess-project-root
+    dest: /home/{{ user_name }}/{{ domain_name }}/.htaccess
+    owner: "{{ user_name }}"
+    group: "{{ user_name }}"
+    mode: '0644'
+
+# copy over .htaccess-web-dir to /home/user/domain/web/.htaccess
+- name: Copy file .htaccess-web-dir to /home/user/domain/web/.htaccess
+  ansible.builtin.copy:
+    src: .htaccess-web-dir
+    dest: /home/{{ user_name }}/{{ domain_name }}/web/.htaccess
+    owner: "{{ user_name }}"
+    group: "{{ user_name }}"
+    mode: '0644'
+
+# insert after databse portion? is inserting at the end of the file
+- name: Insert block of text in application.php
+  ansible.builtin.blockinfile:
+    path: /home/{{ user_name }}/{{ domain_name}}/config/application.php
+    insertafter: "Config::define('WP_CONTENT_URL', Config::get('WP_HOME') . Config::get('CONTENT_DIR'));"
+    block: |
+      Config::define( 'WP_ALLOW_MULTISITE', true );
+      Config::define( 'MULTISITE', true );
+      Config::define( 'SUBDOMAIN_INSTALL', false );
+      $base = '/';
+      Config::define( 'DOMAIN_CURRENT_SITE', '{{domain_name}}' );
+      Config::define( 'PATH_CURRENT_SITE', '/' );
+      Config::define( 'SITE_ID_CURRENT_SITE', 1 );
+      Config::define( 'BLOG_ID_CURRENT_SITE', 1 );
+
+- name: Add user 'user_name' to 'www-data' group
+  ansible.builtin.user:
+    name: "{{ user_name }}"
+    groups: www-data
+    append: yes
+    state: present
+  become: yes # Required for managing users and groups
 
 # copy the bedrock dir from home/user/domain to /var/www/domain
 - name: /home/user/domain/ dir to /var/www/domain
@@ -185,6 +200,12 @@
     state: absent
   become: true
 
+# restart apache2
+- name: Restart Apache2 service
+  ansible.builtin.service:
+    name: apache2
+    state: restarted
+
 # after the basic wordpress installation is made and it is confirmed that you can login, create pages, view pages, etc
 # Then try the wp cli command: wp core multisite-convert
 # The multisite-covert wp cli command didn't work. When .env is changed, site breaks. When .env is put back, front page works, but can't log in.
@@ -202,49 +223,3 @@
 # define( 'PATH_CURRENT_SITE', '/' );
 # define( 'SITE_ID_CURRENT_SITE', 1 );
 # define( 'BLOG_ID_CURRENT_SITE', 1 );
-
-# in /home/user/domain/.htaccess
-
-# # .htaccess in your project root (e.g., /var/www/your-site/.htaccess)
-
-# <IfModule mod_rewrite.c>
-#   RewriteEngine On
-#   RewriteBase /
-#   RewriteRule ^index\.php$ - [L]
-#   RewriteCond %{REQUEST_URI} !^/web/
-#   RewriteRule ^(.*)$ web/$1 [L]
-# </IfModule>
-
-# in /home/user/domain/web/.htaccess
-
-# # .htaccess in your web/ directory (e.g., /var/www/your-site/web/.htaccess)
-
-# # BEGIN WordPress
-# <IfModule mod_rewrite.c>
-#   RewriteEngine On
-#   RewriteBase /
-
-#   # Multisite Rules (choose Subdomains or Subdirectories based on your setup)
-
-#   # For Subdomains:
-#   # RewriteRule ^index\.php$ - [L]
-#   # RewriteCond %{REQUEST_FILENAME} !-f
-#   # RewriteCond %{REQUEST_FILENAME} !-d
-#   # RewriteRule ^([_0-9a-zA-Z-]+/)?(wp-(content|admin|includes).*) wp/$2 [L]
-#   # RewriteCond %{REQUEST_FILENAME} !-f
-#   # RewriteCond %{REQUEST_FILENAME} !-d
-#   # RewriteRule ^([_0-9a-zA-Z-]+/)?(.*\.php)$ wp/$2 [L]
-#   # RewriteRule . index.php [L]
-
-#   # For Subdirectories:
-#   RewriteRule ^index\.php$ - [L]
-#   RewriteCond %{REQUEST_FILENAME} !-f
-#   RewriteCond %{REQUEST_FILENAME} !-d
-#   RewriteRule ^([_0-9a-zA-Z-]+/)?(wp-(content|admin|includes).*) wp/$2 [L]
-#   RewriteCond %{REQUEST_FILENAME} !-f
-#   RewriteCond %{REQUEST_FILENAME} !-d
-#   RewriteRule ^([_0-9a-zA-Z-]+/)?(.*\.php)$ wp/$2 [L]
-#   RewriteRule . index.php [L]
-
-# </IfModule>
-# # END WordPress
