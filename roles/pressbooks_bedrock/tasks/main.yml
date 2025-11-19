@@ -139,32 +139,13 @@
   debug:
     var: wp_cli_core_install_output.stdout_lines
 
-# - name: Run wp cli to install pressbooks
-#   command:
-#     argv:
-#       - /usr/local/bin/wp
-#       - plugin
-#       - activate
-#       - pressbooks
-#       - --network
-#   args:
-#     chdir: "/home/{{ user_name }}/{{ domain_name }}/"
-#   become: yes
-#   become_user: "{{ user_name }}"
-#   register: wp_cli_pressbooks_install_output
-
-# # show the wp cli output
-# - name: Show the wp-cli cli_output
-#   debug:
-#     var: wp_cli_pressbooks_install_output.stdout_lines
-
-# - name: Template a file to /home/user/domain/web/.htaccess
-#   ansible.builtin.template:
-#     src: .htaccess.j2
-#     dest: "/home/{{user_name}}/{{ domain_name }}/web/.htaccess"
-#     owner: "{{ user_name }}"
-#     group: "{{ user_name }}"
-#     mode: '0744'
+- name: Template a file to /home/user/domain/web/.htaccess
+  ansible.builtin.template:
+    src: .htaccess.j2
+    dest: "/home/{{user_name}}/{{ domain_name }}/web/.htaccess"
+    owner: "{{ user_name }}"
+    group: "{{ user_name }}"
+    mode: '0744'
 
 - name: copy /home/user/domain/ dir to /var/www/domain
   ansible.builtin.copy:
